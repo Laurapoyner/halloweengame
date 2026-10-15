@@ -33,6 +33,7 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 **Driller en opgave?**
 - Der er et "Voksen: godkend"-link på hver opgave.
 - I Voksen-menuen kan du godkende eller nulstille alle opgaver.
+- **Test en fangst uden at gå rundt:** Voksen-menu → *Test en fangst*. Spøgelset, katten eller skelettet dukker op lige foran kameraet, så du kan prøve fangsten. Opgaven bliver ikke markeret som klaret.
 
 **Andre indstillinger i Voksen-menuen:**
 - Hemmeligt kodeord (standard: `HALLOWEENGODTERI`, 16 bogstaver = ét pr. opgave).
