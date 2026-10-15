@@ -1,0 +1,36 @@
+# Laver lydfilerne med den pæne stemme automatisk, når index.html ændres,
+# eller når du trykker "Run workflow" under fanen Actions på GitHub.
+# Kræver en hemmelighed (Settings → Secrets and variables → Actions):
+#   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION   (eller ELEVENLABS_API_KEY)
+# Valgfrit: variablen STEMME, fx da-DK-JeppeNeural.
+name: Lav stemmer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['index.html', 'stemmer/**']
+
+permissions:
+  contents: write
+
+jobs:
+  stemmer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Lav lydfiler
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 stemmer/lav-stemmer.py --auto --stemme "${{ vars.STEMME }}"
+      - name: Gem lydfilerne i repoet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add lyd || true
+          git diff --cached --quiet || (git commit -m "Nye lydfiler til stemmen" && git push)
