@@ -41,9 +41,26 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 - *Nem tilstand* for de mindste.
 - *Start forfra*.
 
-## Pæn stemme (anbefalet)
+## Indtal stemmen selv (anbefalet)
 
-Telefonernes egen oplæsning lyder robotagtig. I stedet kan du lave **lydfiler med en rigtig dansk AI-stemme** én gang. Så bruger alle telefoner dem automatisk.
+Telefonernes egen oplæsning lyder robotagtig. Den nemmeste løsning er at indtale replikkerne selv, så børnene hører en voksen, de kender.
+
+1. Åbn spillet fra jeres egen adresse (fx Render) på en computer eller telefon med mikrofon.
+2. Gå til **Voksen-menu → Stemme → 🎙️ Indtal stemmen selv**.
+3. Tryk **● Optag** ud for en replik, læs den højt, og tryk **■ Stop**.
+   - Optagelsen afspilles bagefter, og du kan tage den om.
+   - Stilhed før og efter klippes væk.
+   - Start med opgaverne. Det, der ikke er indtalt, bliver bare ikke læst op.
+4. Tryk **⬇️ Hent lydpakke til alle telefoner**. Du får filen `lyd.zip`.
+5. Pak den ud, og læg mappen **`lyd`** i GitHub-repoet ved siden af `index.html`.
+   På GitHub: *Add file → Upload files*, og træk mappen ind.
+6. Render opdaterer siden, og alle telefoner bruger dine optagelser.
+
+Optagelserne ligger også gemt i browseren på den enhed, du indtalte på, så du kan fortsætte senere. GitHub-handlingen "Lav stemmer" overskriver aldrig dine egne optagelser.
+
+## AI-stemme (alternativ)
+
+I stedet kan du lave **lydfiler med en rigtig dansk AI-stemme** én gang. Så bruger alle telefoner dem automatisk.
 
 **Med GitHub (nemmest, når siden ligger på GitHub):**
 

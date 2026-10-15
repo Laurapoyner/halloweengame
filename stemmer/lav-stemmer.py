@@ -109,7 +109,14 @@ def main():
     ap.add_argument('--stemme', default='', help='Azure: fx da-DK-ChristelNeural · ElevenLabs: voice_id')
     ap.add_argument('--tempo', default='-5%', help='Azure: talehastighed, fx -10%% (langsommere) eller 0%%')
     ap.add_argument('--alle', action='store_true', help='lav alle filer igen, også uændrede')
+    ap.add_argument('--overskriv', action='store_true', help='erstat egne optagelser med AI-stemmen')
     a = ap.parse_args()
+
+    if os.path.exists(MANIFEST):
+        with open(MANIFEST, encoding='utf-8') as f:
+            if json.load(f).get('provider') == 'egen' and not a.overskriv:
+                print('Mappen lyd/ indeholder jeres egne optagelser – de bliver ikke overskrevet. Brug --overskriv for at erstatte dem.')
+                return
 
     tjeneste = a.tjeneste
     if a.auto:

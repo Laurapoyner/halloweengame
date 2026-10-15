@@ -235,10 +235,11 @@ h1{
 
 /* Kameravisning: spejlet og spøgelsesmåleren */
 .live-view{position:fixed;inset:0;z-index:50;background:var(--night);overflow:hidden;touch-action:none}
-.live-view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);transition:filter .4s}
-.live-view.rear video{transform:none}
+/* Videoen er næsten usynlig: kamerabilledet tegnes ind på lærredet sammen med figurerne */
+.live-view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.01;z-index:0;pointer-events:none}
 .live-view.nocam video{display:none}
-.live-view canvas{position:absolute;inset:0;width:100%;height:100%}
+.live-view canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;transition:filter .4s}
+.live-err{position:absolute;z-index:4;left:max(16px, env(safe-area-inset-left,0px));right:max(16px, env(safe-area-inset-right,0px));top:calc(64px + env(safe-area-inset-top,0px));background:var(--blood);color:var(--night);font-weight:700;font-size:.85rem;padding:6px 10px;border-radius:10px}
 .live-top{
   position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:12px;
   padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:10px;
@@ -312,6 +313,28 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 .state{font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;flex:none}
 .state.ok{background:var(--slime);color:var(--night)}
 .state.wait{background:var(--dusk-2);color:var(--mist)}
+
+/* Indtal stemmen */
+.studio{position:fixed;inset:0;z-index:65;background:var(--night);overflow-y:auto}
+.studio-in{
+  max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(32px + env(safe-area-inset-bottom,0px));
+}
+.studio-head{display:flex;flex-direction:column;gap:10px}
+.studio h2{font-family:var(--font-display);font-weight:400;font-size:2.6rem;line-height:1;margin:0;color:var(--moon)}
+.studio-head p{margin:0;color:var(--mist)}
+#studioCount{color:var(--slime);font-weight:800}
+#studioNote{background:var(--dusk);border-radius:12px;padding:10px 12px;color:var(--bone)}
+#studioList{display:flex;flex-direction:column;gap:8px}
+.rec-grp{margin:14px 0 2px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)}
+.rec-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:var(--dusk);border:2px solid var(--dusk-2);border-radius:14px;padding:10px 12px}
+.rec-row.has{border-color:var(--slime)}
+.rec-row.on{border-color:var(--blood)}
+.rec-txt{flex:1 1 220px;min-width:0;margin:0;font-size:1.02rem;line-height:1.35}
+.rec-btns{display:flex;gap:6px;flex:none;margin-left:auto}
+.rec-btns .btn.small{min-width:44px}
+.rec-stop{background:var(--blood);color:var(--night);animation:blink 1s infinite}
 
 /* Finale */
 .finale{position:fixed;inset:0;z-index:25;background:var(--night);overflow-y:auto}
@@ -457,9 +480,25 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   </div>
   <div id="liveMsg" class="live-msg" hidden><div id="liveMsgBox" class="box"></div></div>
   <button type="button" id="liveWalk" class="walk" hidden aria-label="Gå et skridt">👣<span>Gå</span></button>
+  <div id="liveErr" class="live-err" hidden></div>
   <div id="liveFlash" class="flash"></div>
 </div>
 
+
+<div id="studio" class="studio" hidden>
+  <div class="studio-in">
+    <div class="studio-head">
+      <h2>Indtal stemmen</h2>
+      <p>Tryk <b>● Optag</b>, læs teksten højt med god Halloween-stemme, og tryk <b>■ Stop</b>. Optagelsen afspilles bagefter, og du kan tage den om. Stilhed før og efter klippes væk.</p>
+      <p>Du behøver ikke indtale det hele. Det, der ikke er indtalt, bliver bare ikke læst op. Start med opgaverne.</p>
+      <p id="studioCount">0 indtalt</p>
+      <div class="actions"><button type="button" class="btn primary" data-sact="zip">⬇️ Hent lydpakke til alle telefoner</button>
+        <button type="button" class="btn secondary" data-sact="close">Luk studiet</button></div>
+      <p id="studioNote" hidden></p>
+    </div>
+    <div id="studioList"></div>
+  </div>
+</div>
 
 <div id="finale" class="finale" hidden>
   <div id="finaleIn" class="finale-in"></div>
@@ -564,8 +603,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     "sp-done":"Alle ti edderkopper er fanget!",
     "finale":"Alt er fyldt! Løb hen til en voksen, og sig kodeordet højt.",
     "test":"Hej hekse! Find noget orange, og tag et billede helt tæt på. En, to, tre!",
-    "num-1":"en","num-2":"to","num-3":"tre","num-4":"fire","num-5":"fem","num-6":"seks","num-7":"syv","num-8":"otte","num-9":"ni","num-10":"ti",
-    "num-11":"elleve","num-12":"tolv","num-13":"tretten","num-14":"fjorten","num-15":"femten","num-16":"seksten","num-17":"sytten","num-18":"atten","num-19":"nitten","num-20":"tyve"
+    "num-1":"en","num-2":"to","num-3":"tre","num-4":"fire","num-5":"fem","num-6":"seks","num-7":"syv","num-8":"otte","num-9":"ni","num-10":"ti"
   }/*PHRASES-END*/;
 
   const PER_PLAYER = 10;   // sprællemænd og flagermus pr. heks
@@ -808,7 +846,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     live:$('#live'), liveVideo:$('#liveVideo'), liveCanvas:$('#liveCanvas'), liveTop:$('#liveTop'), liveHud:$('#liveHud'),
     liveTitle:$('#liveTitle'), liveBig:$('#liveBig'), liveMeter:$('#liveMeter'), liveSub:$('#liveSub'),
     liveBarWrap:$('#liveBarWrap'), liveBar:$('#liveBar'), liveHint:$('#liveHint'),
-    liveMsg:$('#liveMsg'), liveMsgBox:$('#liveMsgBox'), liveFlash:$('#liveFlash'), liveWalk:$('#liveWalk'),
+    liveMsg:$('#liveMsg'), liveMsgBox:$('#liveMsgBox'), liveFlash:$('#liveFlash'), liveWalk:$('#liveWalk'), liveErr:$('#liveErr'), studio:$('#studio'),
     modal:$('#modal'), modalCard:$('#modalCard'), finale:$('#finale'), finaleIn:$('#finaleIn'),
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -942,18 +980,48 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }, 60);
   }
 
+  /* Egne optagelser (Voksen-menu → Indtal stemmen) gemmes i browseren på denne enhed og bruges før alt andet */
+  const rec = { keys:new Set(), dbP:null };
+  function idb(){
+    if (!rec.dbP){
+      rec.dbP = new Promise((res, rej) => {
+        try {
+          const r = indexedDB.open('heksens-trylledrik-lyd', 1);
+          r.onupgradeneeded = () => r.result.createObjectStore('lyd');
+          r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+        } catch (e) { rej(e); }
+      });
+      rec.dbP.catch(() => { rec.dbP = null; });
+    }
+    return rec.dbP;
+  }
+  function idbDo(mode, fn){
+    return idb().then(db => new Promise((res, rej) => {
+      const tx = db.transaction('lyd', mode), req = fn(tx.objectStore('lyd'));
+      tx.oncomplete = () => res(req && req.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+    }));
+  }
+  const recGet = k => idbDo('readonly', st => st.get(k));
+  const recPut = (k, blob) => idbDo('readwrite', st => st.put(blob, k));
+  const recDel = k => idbDo('readwrite', st => st.delete(k));
+  idbDo('readonly', st => st.getAllKeys()).then(ks => (ks || []).forEach(k => rec.keys.add(k))).catch(() => {});
+
+  const decodeAudio = ab => new Promise((res, rej) => { const q = actx.decodeAudioData(ab, res, rej); if (q && q.then) q.then(res, rej); });
+  const hasAudio = k => typeof k === 'string' && (rec.keys.has(k) || !!pack.files[k]);
   let playTok = 0, playSrc = null;
   function getBuf(key){
-    if (!pack.bufs.has(key)){
-      const p = fetch('lyd/' + pack.files[key])
-        .then(r => { if (!r.ok) throw new Error('lyd'); return r.arrayBuffer(); })
-        .then(ab => new Promise((res, rej) => { const q = actx.decodeAudioData(ab, res, rej); if (q && q.then) q.then(res, rej); }));
-      p.catch(() => pack.bufs.delete(key));
-      pack.bufs.set(key, p);
+    const own = rec.keys.has(key), id = (own ? 'rec:' : 'pack:') + key;
+    if (!pack.bufs.has(id)){
+      const src = own
+        ? recGet(key).then(b => { if (!b) throw new Error('lyd'); return b.arrayBuffer(); })
+        : fetch('lyd/' + pack.files[key]).then(r => { if (!r.ok) throw new Error('lyd'); return r.arrayBuffer(); });
+      const p = src.then(decodeAudio);
+      p.catch(() => pack.bufs.delete(id));
+      pack.bufs.set(id, p);
     }
-    return pack.bufs.get(key);
+    return pack.bufs.get(id);
   }
-  function preload(keys){ if (pack.ready && actx) keys.forEach(k => { if (typeof k === 'string' && pack.files[k]) getBuf(k).catch(() => {}); }); }
+  function preload(keys){ if (actx) keys.forEach(k => { if (hasAudio(k)) getBuf(k).catch(() => {}); }); }
   function stopSrc(){ const s = playSrc; playSrc = null; if (s){ try { s.stop(); } catch (e) {} } }
   async function playKeys(keys){
     const my = ++playTok;
@@ -979,9 +1047,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (!state.autoRead && !force) return;
     parts = (parts || []).filter(Boolean);
     if (!parts.length) return;
-    if (pack.ready && actx){
+    if ((pack.ready || rec.keys.size) && actx){
+      // Der findes lydfiler eller egne optagelser: spil dem, og spring robotstemmen over
       try { speech.ok && speechSynthesis.cancel(); } catch (e) {}
-      playKeys(parts.filter(p => typeof p === 'string' && pack.files[p]));
+      playKeys(parts.filter(hasAudio));
       return;
     }
     if (!speech.ok) return;
@@ -1392,7 +1461,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     el.liveBig.hidden = searchMode; el.liveMeter.hidden = !searchMode; el.liveBarWrap.hidden = searchMode;
     if (searchMode && !el.liveMeter.children.length) el.liveMeter.innerHTML = Array.from({ length:10 }, (_, i) => `<i style="--k:${i}"></i>`).join('');
     el.liveTitle.textContent = searchMode ? 'Spøgelsesmåleren' : task.name;
-    el.liveVideo.style.filter = '';
+    el.liveCanvas.style.filter = '';
     el.live.hidden = false;
     const warm = mode === 'spiders' ? 'Edderkopperne vågner…' : searchMode ? 'Måleren varmer op…' : 'Heksen tryller spejlet frem…';
     setMsg(`<span class="wand" aria-hidden="true">🪄</span><h3>${warm}</h3><p>Giv lov til kameraet${ar ? ' og bevægelse' : ''}, hvis telefonen spørger.</p>`);
@@ -1459,9 +1528,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     window.removeEventListener('deviceorientation', onOrient);
     window.removeEventListener('devicemotion', onMotion);
     el.liveVideo.srcObject = null;
-    el.liveVideo.style.filter = '';
+    el.liveCanvas.style.filter = '';
     el.live.classList.remove('nocam');
     el.liveWalk.hidden = true;
+    el.liveErr.hidden = true; errShown = '';
+    el.liveCanvas.getContext('2d').clearRect(0, 0, el.liveCanvas.width, el.liveCanvas.height);
     hideMsg();
     el.live.hidden = true;
     if (!silent){ shush(); if (cur && cur.phase === 'intro') renderSheet(); }
@@ -1498,16 +1569,29 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
     me.ctx = me.ctx || c.getContext('2d');
     me.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (isAR(me.mode)){
-      arStep(now);
-    } else if (v.currentTime !== me.lastVT){
-      me.lastVT = v.currentTime;
-      let res = null;
-      try { res = me.detector.detectForVideo(v, now); } catch (e) {}
-      if (res && res.landmarks) me.screen = res.landmarks.map(p => toScreen(p, g));
-      step(now);
-    }
-    if (L === me) draw(now);
+    try {
+      if (isAR(me.mode)){
+        arStep(now);
+      } else if (v.currentTime !== me.lastVT){
+        me.lastVT = v.currentTime;
+        let res = null;
+        try { res = me.detector.detectForVideo(v, now); } catch (e) { showLiveErr(e, 'kropsgenkendelse'); }
+        if (res && res.landmarks) me.screen = res.landmarks.map(p => toScreen(p, g));
+        step(now);
+      }
+      if (L === me) draw(now);
+    } catch (e) { showLiveErr(e); }
+  }
+
+  /* Viser en lille fejlbesked øverst, hvis noget går galt på telefonen – så kan den voksne tage et skærmbillede */
+  let errShown = '';
+  function showLiveErr(e, where){
+    const msg = `${where ? where + ': ' : ''}${(e && (e.message || e.name)) || e}`;
+    if (msg === errShown) return;
+    errShown = msg;
+    el.liveErr.textContent = 'Teknisk fejl – ' + msg;
+    el.liveErr.hidden = false;
+    try { console.error(e); } catch (x) {}
   }
 
   /* ---------- Spejlet ---------- */
@@ -1545,10 +1629,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       const before = g.state;
       const r = freezeStep(g, poses, rect, now);
       if (r === 'moved'){ sfx.buzz(); talk(['moved']); }
-      else if (r === true){ el.liveVideo.style.filter = 'grayscale(1) contrast(1.15)'; return startPhoto(now); }
+      else if (r === true){ el.liveCanvas.style.filter = 'grayscale(1) contrast(1.15)'; return startPhoto(now); }
       else if (before !== 'still' && g.state === 'still') talk(['frys']);
       const p = Math.min(1, g.held / g.need);
-      el.liveVideo.style.filter = p > 0 ? `grayscale(${p.toFixed(2)}) contrast(${(1 + p*.15).toFixed(2)})` : '';
+      el.liveCanvas.style.filter = p > 0 ? `grayscale(${p.toFixed(2)}) contrast(${(1 + p*.15).toFixed(2)})` : '';
     }
     updateHud(now);
   }
@@ -1884,7 +1968,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
     const sp = g.spider, a = spiderAngles(sp, now);
     const p = sp.p = projectAR(a.yaw, a.pitch);
-    if (p.on && !sp.seen){ sp.seen = true; talk(['sp-found']); }
+    if (p.on && !sp.seen){ sp.seen = true; sp.seenAt = now; sfx.whoosh(); talk(['sp-found']); }
     g.inside = aimDist(p) < aimRadius();
     g.hold = g.inside ? g.hold + dt : Math.max(0, g.hold - dt * 1.5);
     if (g.hold >= g.need){
@@ -1963,16 +2047,68 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     ctx.restore();
   }
 
-  function drawCreature(ctx, icon, x, y, size, alpha, wobble){
+  /* Pulserende ring, så man kan få øje på noget i et rodet eller mørkt kamerabillede */
+  function drawPulse(ctx, x, y, size, now, col){
+    const ph = (now / 900) % 1;
+    ctx.save();
+    ctx.strokeStyle = hexA(col || COL.pumpkin, (1 - ph) * .95); ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(x, y, size * (.5 + ph * .5), 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCreature(ctx, icon, x, y, size, alpha, wobble, now){
+    if (icon === '🕷️') return drawSpider(ctx, x, y, size, now || 0, alpha);
     ctx.save();
     ctx.globalAlpha = alpha;
     const grd = ctx.createRadialGradient(x, y, 0, x, y, size * .8);
-    grd.addColorStop(0, hexA(COL.bone, .55)); grd.addColorStop(1, hexA(COL.bone, 0));
+    grd.addColorStop(0, hexA(COL.moon, .75)); grd.addColorStop(.6, hexA(COL.moon, .35)); grd.addColorStop(1, hexA(COL.moon, 0));
     ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(x, y, size * .8, 0, Math.PI * 2); ctx.fill();
     ctx.translate(x, y); ctx.rotate(wobble);
     ctx.font = `${Math.round(size)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(icon, 0, 0);
+    ctx.restore();
+    if (now) drawPulse(ctx, x, y, size, now);
+  }
+
+  /* En tydelig Halloween-edderkop tegnet på lærredet: sort krop med lys kant, orange striber,
+     lysende øjne og ben, der kravler. Kanten gør den synlig på både lyse og mørke vægge. */
+  function drawSpider(ctx, x, y, size, now, alpha = 1){
+    const r = size * .17, edge = COL.bone, body = COL.night;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, size * .9);
+    grd.addColorStop(0, hexA(COL.moon, .6)); grd.addColorStop(1, hexA(COL.moon, 0));
+    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(x, y, size * .9, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(x, y);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const legs = [];
+    for (const side of [-1, 1]) for (let i = 0; i < 4; i++){
+      const th = (-48 + i * 32 + Math.sin(now / 95 + i * 1.7 + (side > 0 ? 2 : 0)) * 7) * Math.PI / 180;
+      legs.push([
+        [side * r * .5, r * .1],
+        [side * Math.cos(th) * r * 2, Math.sin(th) * r * 2 - r * 1.1],
+        [side * Math.cos(th) * r * 3.2, Math.sin(th) * r * 3.2 + r * .5],
+      ]);
+    }
+    const strokeLegs = (col, w) => {
+      ctx.strokeStyle = col; ctx.lineWidth = w;
+      for (const l of legs){ ctx.beginPath(); ctx.moveTo(l[0][0], l[0][1]); ctx.lineTo(l[1][0], l[1][1]); ctx.lineTo(l[2][0], l[2][1]); ctx.stroke(); }
+    };
+    strokeLegs(edge, r * .42 + 4);
+    strokeLegs(body, r * .42);
+    // bagkrop med orange striber, og hoved
+    ctx.fillStyle = body; ctx.strokeStyle = edge; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(0, r * .9, r * 1.15, r * 1.35, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = COL.pumpkin;
+    ctx.fillRect(-r * 1.2, r * .45, r * 2.4, r * .28); ctx.fillRect(-r * 1.2, r * 1.15, r * 2.4, r * .28);
+    ctx.restore();
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, -r * .55, r * .78, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // lysende øjne
+    ctx.fillStyle = COL.slime; ctx.shadowColor = COL.slime; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(-r * .3, -r * .65, r * .2, 0, Math.PI * 2); ctx.arc(r * .3, -r * .65, r * .2, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -2067,13 +2203,17 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     drawNight(ctx);
     const sp = g.spider;
     if (sp && sp.p){
-      const p = sp.p, size = Math.min(W, H) * .22;
+      const p = sp.p, size = Math.min(W, H) * .3;
       if (p.on){
+        // Første gang den ses, dumper den ned i sin tråd fra loftet
+        const k = sp.seenAt ? Math.min(1, (now - sp.seenAt) / 650) : 1, ease = 1 - Math.pow(1 - k, 3);
+        const y = p.y - (1 - ease) * H * .35;
         ctx.save();
-        ctx.strokeStyle = hexA(COL.bone, .55); ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(p.x, p.y - size * .3); ctx.lineTo(p.x, -10); ctx.stroke();
+        ctx.strokeStyle = hexA(COL.bone, .9); ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(p.x, y - size * .35); ctx.lineTo(p.x, -10); ctx.stroke();
         ctx.restore();
-        drawCreature(ctx, '🕷️', p.x, p.y, size, 1, Math.sin(now / 140) * .15);
+        drawPulse(ctx, p.x, y, size, now);
+        drawSpider(ctx, p.x, y, size, now);
       } else drawArrow(ctx, p, '🕷️', now);
     }
     drawAim(ctx, g.hold, g.need, g.inside);
@@ -2103,7 +2243,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       ctx.restore();
     } else if (g.phase === 'reveal'){
       const p = g.p;
-      if (p && p.on) drawCreature(ctx, g.task.icon, p.x, p.y, S * .3, .35 + .3 * Math.sin(now / 60), Math.sin(now / 200) * .2);
+      if (p && p.on) drawCreature(ctx, g.task.icon, p.x, p.y, S * .3, .35 + .3 * Math.sin(now / 60), Math.sin(now / 200) * .2, now);
       else if (p) drawArrow(ctx, p, g.task.icon, now);
     } else if (g.phase === 'catch'){
       const c = g.c;
@@ -2112,7 +2252,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         if (c.p.on) drawCreature(ctx, g.task.icon, c.p.x, c.p.y, size * (.4 + .6 * k) * (1 - hitK * .15), .92, Math.sin(now / 260) * .15);
         else drawArrow(ctx, c.p, g.task.icon, now);
       } else if (L.mode === 'cat'){
-        if (c.p.on) drawCreature(ctx, g.task.icon, c.p.x, c.p.y, S * .26, 1, Math.sin(now / 110) * .08 * c.dir);
+        if (c.p.on) drawCreature(ctx, g.task.icon, c.p.x, c.p.y, S * .26, 1, Math.sin(now / 110) * .08 * c.dir, now);
         else drawArrow(ctx, c.p, g.task.icon, now);
         drawAim(ctx, c.held, c.need, c.inside);
       } else {
@@ -2120,7 +2260,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         let nearest = null, nd = Infinity;
         for (const b of c.bones){
           if (b.taken) continue;
-          if (b.p.on) drawCreature(ctx, '🦴', b.p.x, b.p.y, S * .14, 1, b.rot + Math.sin(now / 400 + b.rot) * .2);
+          if (b.p.on) drawCreature(ctx, '🦴', b.p.x, b.p.y, S * .14, 1, b.rot + Math.sin(now / 400 + b.rot) * .2, now);
           else { const d = Math.abs(b.p.dy) + Math.abs(b.p.dp); if (d < nd){ nd = d; nearest = b; } }
         }
         if (!c.anyOn && nearest) drawArrow(ctx, nearest.p, '🦴', now);
@@ -2132,9 +2272,21 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     drawBursts(ctx, g.bursts, now);
   }
 
+  /* Kamerabilledet tegnes ind på lærredet under figurerne. Så kan telefonens browser ikke komme til at
+     lægge videoen oven på hatte, flagermus og edderkopper (det sker ellers på nogle iPhones). */
+  function drawVideo(ctx){
+    const v = el.liveVideo, g = L.geom;
+    if (L.noCam || !L.stream || v.readyState < 2 || !v.videoWidth) return;
+    ctx.save();
+    if (!isAR(L.mode)){ ctx.translate(g.W, 0); ctx.scale(-1, 1); }
+    try { ctx.drawImage(v, g.ox, g.oy, g.dw, g.dh); } catch (e) {}
+    ctx.restore();
+  }
+
   function draw(now){
     const ctx = L.ctx, { W, H } = L.geom;
     ctx.clearRect(0, 0, W, H);
+    drawVideo(ctx);
     if (isAR(L.mode)){ (L.mode === 'spiders' ? drawSpiders : drawCreatureHunt)(ctx, now); return; }
     if (L.phase === 'run' || L.phase === 'switch') drawFrame(ctx, now);
     const prev = L.hats;
@@ -2179,6 +2331,174 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (!a) return;
     if (a.dataset.lact === 'close') closeLive();
     if (a.dataset.lact === 'retry' && L) openLive(L.task);
+  });
+
+  /* ================= Indtal stemmen selv =================
+     En voksen indtaler replikkerne. Optagelserne gemmes i browseren på denne enhed (og bruges med det samme her).
+     "Hent lydpakke" giver en zip med mappen lyd/, som lægges på GitHub – så bruger alle telefoner optagelserne. */
+  const studioKeys = () => TASKS.map(t => 'task-' + t.id).concat(Object.keys(PHRASES));
+  function groupOf(k){
+    if (k.startsWith('task-')) return 'Opgaverne (de vigtigste)';
+    if (/^(look-|not-yet|fail-|ok-)/.test(k)) return 'Fotojagt og ros';
+    if (/^(intro-|skift|frys|moved|smile)/.test(k)) return 'Det magiske spejl';
+    if (/^(hunt-|warmer|colder|once-more|sp-)/.test(k)) return 'Jagterne';
+    if (k.startsWith('num-')) return 'Tal til at tælle højt';
+    return 'Til sidst';
+  }
+
+  /* Optagelsen gøres til en WAV-fil (mono, klippet for stilhed før og efter), som alle telefoner kan afspille */
+  function toWav(buf){
+    const src = buf.getChannelData(0), sr = buf.sampleRate, step = Math.max(1, Math.floor(sr / 22050));
+    let peak = 0; for (let i = 0; i < src.length; i++) peak = Math.max(peak, Math.abs(src[i]));
+    const thr = Math.max(.012, peak * .06), pad = Math.floor(sr * .12);
+    let a = 0, b = src.length - 1;
+    while (a < b && Math.abs(src[a]) < thr) a++;
+    while (b > a && Math.abs(src[b]) < thr) b--;
+    a = Math.max(0, a - pad); b = Math.min(src.length - 1, b + pad);
+    const n = Math.max(1, Math.floor((b - a + 1) / step)), gain = peak > 0 ? Math.min(4, .9 / peak) : 1;
+    const out = new DataView(new ArrayBuffer(44 + n * 2)), rate = Math.round(sr / step);
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); out.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+    out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, rate, true); out.setUint32(28, rate * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
+    str(36, 'data'); out.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++){
+      let s = 0; for (let j = 0; j < step; j++) s += src[a + i * step + j] || 0;
+      const v = Math.max(-1, Math.min(1, s / step * gain));
+      out.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+    }
+    return new Blob([out.buffer], { type:'audio/wav' });
+  }
+
+  /* En lille zip-fil uden komprimering (WAV-lyd fylder alligevel det samme) */
+  const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(u8){ let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function makeZip(files){
+    const enc = new TextEncoder(), parts = [], central = [];
+    let offset = 0;
+    for (const f of files){
+      const name = enc.encode(f.name), data = f.data, crc = crc32(data);
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(8, 0, true);
+      h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true);
+      h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+      parts.push(h.buffer, name, data);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true);
+      c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true);
+      c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true);
+      c.setUint32(42, offset, true);
+      central.push(c.buffer, name);
+      offset += 30 + name.length + data.length;
+    }
+    const cdSize = central.reduce((s, b) => s + (b.byteLength || b.length), 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+    return new Blob([...parts, ...central, end.buffer], { type:'application/zip' });
+  }
+
+  let recState = null;
+  function studioNote(msg){ const n = $('#studioNote'); if (n){ n.textContent = msg; n.hidden = !msg; } }
+  function studioCount(){
+    const all = studioKeys(), done = all.filter(k => rec.keys.has(k)).length;
+    const c = $('#studioCount'); if (c) c.textContent = `${done} af ${all.length} indtalt`;
+  }
+  function studioRow(k){
+    const own = rec.keys.has(k), on = recState && recState.key === k;
+    return `<div class="rec-row${own ? ' has' : ''}${on ? ' on' : ''}" data-key="${esc(k)}">
+      <p class="rec-txt">${esc(lineText(k))}</p>
+      <div class="rec-btns">
+        <button type="button" class="btn small ${on ? 'rec-stop' : 'secondary'}" data-ract="${on ? 'stop' : 'rec'}">${on ? '■ Stop' : own ? '● Igen' : '● Optag'}</button>
+        ${own ? '<button type="button" class="btn small secondary" data-ract="play" aria-label="Afspil">▶</button><button type="button" class="btn small secondary" data-ract="del" aria-label="Slet">✕</button>' : ''}
+      </div></div>`;
+  }
+  function refreshRow(k){
+    const row = el.studio.querySelector(`.rec-row[data-key="${CSS.escape(k)}"]`);
+    if (row) row.outerHTML = studioRow(k);
+    studioCount();
+  }
+  function openStudio(){
+    let html = '', grp = '';
+    for (const k of studioKeys()){
+      const g = groupOf(k);
+      if (g !== grp){ html += `<h3 class="rec-grp">${g}</h3>`; grp = g; }
+      html += studioRow(k);
+    }
+    $('#studioList').innerHTML = html;
+    studioNote('');
+    studioCount();
+    el.studio.hidden = false; el.studio.scrollTop = 0;
+  }
+  async function startRec(k){
+    if (recState) await stopRec();
+    unlockAudio(); shush();
+    let stream;
+    try {
+      if (!navigator.mediaDevices || !window.MediaRecorder) throw new Error('nomedia');
+      stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+    } catch (e) {
+      studioNote(inFrame ? 'Mikrofonen virker ikke på test-siden her i Claude. Åbn spillet fra jeres egen adresse for at indtale.'
+                         : 'Giv lov til mikrofonen i browseren (ikonet i adresselinjen), og prøv igen.');
+      return;
+    }
+    const mr = new MediaRecorder(stream), chunks = [];
+    mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    const done = new Promise(res => { mr.onstop = res; });
+    recState = { key:k, mr, stream, chunks, done };
+    mr.start();
+    refreshRow(k);
+  }
+  async function stopRec(){
+    const r = recState;
+    if (!r) return;
+    recState = null;
+    try { r.mr.stop(); } catch (e) {}
+    await r.done;
+    r.stream.getTracks().forEach(t => t.stop());
+    try {
+      const blob = new Blob(r.chunks, { type: r.mr.mimeType || 'audio/webm' });
+      const wav = toWav(await decodeAudio(await blob.arrayBuffer()));
+      await recPut(r.key, wav);
+      rec.keys.add(r.key);
+      pack.bufs.delete('rec:' + r.key);
+      refreshRow(r.key);
+      playKeys([r.key]);
+    } catch (e) {
+      refreshRow(r.key);
+      studioNote('Optagelsen kunne ikke gemmes. Prøv igen – og tal lidt højere.');
+    }
+  }
+  async function downloadPack(){
+    const keys = studioKeys().filter(k => rec.keys.has(k));
+    if (!keys.length){ studioNote('Der er ingen optagelser endnu.'); return; }
+    studioNote('Pakker lydfilerne …');
+    const files = [], map = {};
+    for (const k of keys){
+      const b = await recGet(k);
+      if (!b) continue;
+      files.push({ name:`lyd/${k}.wav`, data:new Uint8Array(await b.arrayBuffer()) });
+      map[k] = `${k}.wav`;
+    }
+    files.unshift({ name:'lyd/stemmer.json', data:new TextEncoder().encode(JSON.stringify({ voice:'Egen stemme', provider:'egen', files:map }, null, 1)) });
+    const zip = makeZip(files), url = URL.createObjectURL(zip);
+    const a = document.createElement('a'); a.href = url; a.download = 'lyd.zip'; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+    studioNote(inFrame
+      ? 'Download virker ikke på test-siden her i Claude. Åbn spillet fra jeres egen adresse.'
+      : `lyd.zip er hentet (${files.length - 1} optagelser). Pak den ud, og læg mappen "lyd" i GitHub-repoet ved siden af index.html.`);
+    if (window.__heksZipLog) window.__heksZipLog(zip); // kun til test
+  }
+  el.studio.addEventListener('click', async e => {
+    const a = e.target.closest('[data-ract],[data-sact]');
+    if (!a) return;
+    if (a.dataset.sact === 'close'){ if (recState) await stopRec(); el.studio.hidden = true; shush(); return; }
+    if (a.dataset.sact === 'zip'){ if (recState) await stopRec(); downloadPack(); return; }
+    const k = a.closest('.rec-row').dataset.key, act = a.dataset.ract;
+    if (act === 'rec') startRec(k);
+    if (act === 'stop') stopRec();
+    if (act === 'play'){ unlockAudio(); playKeys([k]); }
+    if (act === 'del'){ await recDel(k).catch(() => {}); rec.keys.delete(k); pack.bufs.delete('rec:' + k); refreshRow(k); }
   });
 
   /* ================= Dialoger ================= */
@@ -2235,8 +2555,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 
   const rateLabel = r => r < .88 ? 'Langsomt' : r > 1.07 ? 'Hurtigt' : 'Normalt';
   function voiceFields(){
+    const own = rec.keys.size;
+    const studio = `<button type="button" class="btn primary" data-act="studio">🎙️ Indtal stemmen selv${own ? ` (${own} optaget)` : ''}</button>
+      <p class="help">Læs replikkerne op med din egen stemme. ${own ? 'Dine optagelser bruges allerede på denne enhed. Hent lydpakken i studiet, og læg den på GitHub, så alle telefoner bruger dem.' : 'Optagelserne kan hentes som en lydpakke og lægges på GitHub, så alle telefoner bruger dem.'}</p>`;
     if (pack.ready){
-      return `<p class="help"><b>Lydfilerne er fundet</b>${pack.voice ? ` (stemme: ${esc(pack.voice)})` : ''}. Spillet bruger dem på alle telefoner i stedet for telefonens egen stemme.</p>
+      return `${studio}<p class="help"><b>Lydfilerne er fundet</b>${pack.voice ? ` (stemme: ${esc(pack.voice)})` : ''}. Spillet bruger dem på alle telefoner i stedet for telefonens egen stemme.</p>
         <button type="button" class="btn secondary" data-act="voicetest">▶ Prøv stemmen</button>`;
     }
     if (!speech.ok) return '<p class="help">Denne browser kan ikke læse op.</p>';
@@ -2246,11 +2569,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     const pick = speech.voices.length
       ? `<div class="field"><label for="voiceIn">Dansk stemme på denne enhed</label><select id="voiceIn" class="inp">${opts}</select></div>`
       : `<p class="help"><b>Der er ingen dansk stemme på denne enhed</b>, så spillet er tavst i stedet for at udtale dansk med engelsk accent.</p>`;
-    return `${pick}
+    return `${studio}${pick}
       <div class="field"><label for="rateIn">Tempo: <span id="rateOut">${rateLabel(rate)}</span></label>
         <input id="rateIn" type="range" min="0.75" max="1.2" step="0.05" value="${rate}"></div>
       <button type="button" class="btn secondary" data-act="voicetest">▶ Prøv stemmen</button>
-      <p class="help">Lige nu bruges enhedens egen stemme. Den pæneste stemme får I med <b>lydfiler fra en AI-stemme</b> – se afsnittet "Pæn stemme" i README-filen. Så lyder det ens på alle telefoner.</p>`;
+      <p class="help">Uden optagelser bruges enhedens egen stemme. Alternativt kan I lave <b>lydfiler med en AI-stemme</b> – se afsnittet "Pæn stemme" i README-filen.</p>`;
   }
 
   function applyAdultFields(){
@@ -2307,9 +2630,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     const act = a.dataset.act;
     if (act === 'mclose') closeModal();
     if (act === 'asave'){ applyAdultFields(); closeModal(); renderAll(); }
+    if (act === 'studio'){ applyAdultFields(); closeModal(); renderAll(); openStudio(); return; }
     if (act === 'voicetest'){
       unlockAudio();
-      if (pack.ready){ talk(['test'], true); return; }
+      if (hasAudio('test')){ talk(['test'], true); return; }
       const vIn = el.modalCard.querySelector('#voiceIn'), rIn = el.modalCard.querySelector('#rateIn');
       const v = vIn ? speech.voices.find(x => x.voiceURI === vIn.value) : speech.voice;
       speakNow(PHRASES.test, v || null, rIn ? parseFloat(rIn.value) : 1);
@@ -2372,6 +2696,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
     if (e.key !== 'Escape') return;
     if (!el.modal.hidden) closeModal();
+    else if (!el.studio.hidden) el.studio.hidden = true;
     else if (!el.live.hidden) closeLive();
     else if (!el.sheet.hidden) closeSheet();
     else if (!el.finale.hidden) el.finale.hidden = true;
