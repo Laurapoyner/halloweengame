@@ -5,29 +5,30 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 | Hvad fyldes | Opgaver |
 |---|---|
 | 🧪 **Trylledrikken** | 9 fotoopgaver rundt i huset (farver, mørke, lys, mumie, edderkop, zombier …) |
-| 👻 **Spøgelsesglasset** | 3 spøgelseskort (spøgelse, kat, skelet), som skal findes med spøgelsesmåleren, og **edderkoppejagten** med 10 edderkopper |
+| 👻 **Spøgelsesglasset** | 3 væsner, der findes med spøgelsesmåleren (spøgelse, kat, skelet – hver fanges på sin måde), og **edderkoppejagten** med 10 edderkopper. Ingen kort er nødvendige |
 | 🌕 **Fuldmånen** | 3 bevægelsesopgaver i det magiske spejl med heksehat på: 10 sprællemænd pr. barn, 10 flagermus pr. barn, og stå stille som sten |
 
 ## Før legen (til den voksne)
 
 1. Åbn **Voksen-menu** nederst. Koden er `1031`.
-2. Tryk **Vis og print kortene**, og print de 3 spøgelseskort (ét pr. A4-side).
-   Gem dem forskellige steder i huset, hvor de kan ses: bag en dør, på køleskabet, under et bord.
-   Skriv evt. en **ledetråd** til hvert kort.
-3. Tryk på holdnavnet øverst, og skriv, hvor mange børn der er på holdet. Det styrer antallet af sprællemænd og flagermus (10 hver).
+2. Tryk på holdnavnet øverst, og skriv, hvor mange børn der er på holdet. Det styrer antallet af sprællemænd og flagermus (10 hver).
 
-**Spøgelsesmåleren reagerer kun på de printede kort.** Den virker ikke på andet.
-- Børnene går rundt med telefonens bagkamera.
-- Når kameraet ser et kort, begynder måleren og lyden at slå ud. Jo tættere de kommer, jo mere slår den ud.
-- Helt tæt på dukker væsenet op i kameraet, og de fanger det ved at trykke på det.
-- Ser måleren ikke noget kort i 20 sekunder, minder den børnene om kortene.
+**Spøgelsesmåleren** virker som "varm og kold".
+- Telefonen tæller skridt og ved, hvilken vej den peger. Væsenet gemmer sig 5–11 meter væk i en tilfældig retning.
+- Jo tættere børnene går på, jo mere slår måleren og lyden ud, og stemmen siger "Varmere!" eller "Koldere!".
+- Kan de ikke komme frem (fx på grund af en væg), kommer væsenet selv langsomt nærmere efter 45 sekunder.
+- Helt tæt på dukker væsenet op i kameraet, og så fanges det hver sin måde:
+  - **Spøgelset:** tryk på det 3 gange, mens det flygter rundt i rummet.
+  - **Katten:** den løber, og børnene skal følge den med kameraet og holde den i sigtet i 4 sekunder.
+  - **Skelettet:** det falder fra hinanden, og børnene skal finde de 5 knogler rundt omkring og trykke på dem.
 
-**Edderkoppejagten** kræver ingen kort.
+**Edderkoppejagten:**
 - Telefonens bevægelsessensor ved, hvilken vej kameraet peger, så edderkopperne "hænger" rundt om børnene i rummet.
 - En pil viser vejen til den næste edderkop.
 - Når edderkoppen holdes i midten af sigtet, bliver den fanget.
 - Mellem hver edderkop skal børnene gå et stykke, før den næste kravler frem.
-- På iPhone skal man give lov til "bevægelse og retning", når telefonen spørger.
+- På iPhone skal man give lov til "bevægelse og retning", når telefonen spørger. Det gælder alle jagterne.
+- Hold telefonen foran jer, når I går. Så tæller skridttælleren bedst.
 
 **Driller en opgave?**
 - Der er et "Voksen: godkend"-link på hver opgave.
@@ -82,8 +83,7 @@ python3 -m http.server 8000
 ```
 
 Åbn http://localhost:8000.
-- Til spøgelseskortene kan du holde et printet kort op foran webcam'et.
-- Edderkoppejagten kan styres ved at trække med musen eller bruge piletasterne.
+- Jagterne kan styres uden sensorer: træk med musen eller brug piletasterne for at dreje, og tryk på 👣-knappen eller mellemrumstasten for at gå et skridt.
 
 ## Læg det på nettet (via GitHub)
 
@@ -95,7 +95,6 @@ python3 -m http.server 8000
 
 ## Godt at vide
 
-- **Kropsgenkendelse:** Googles MediaPipe. Den hentes fra internettet første gang spejlet åbnes (ca. 10 MB).
-- **Kortlæsning:** telefonens indbyggede QR-læser eller jsQR.
-- Begge dele kræver, at telefonerne har net.
+- **Kropsgenkendelse:** Googles MediaPipe. Den hentes fra internettet første gang spejlet åbnes (ca. 10 MB), så telefonerne skal have net.
+- **Jagterne** bruger kun telefonens egne sensorer og virker uden net, når siden først er åbnet.
 - **Gemt fremskridt:** ligger lige nu kun på den telefon, holdet bruger. Næste skridt er en lille server med MongoDB, så alt samles ét sted. Gemme-logikken ligger i `store` i `index.html`.
