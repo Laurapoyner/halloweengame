@@ -1,0 +1,16 @@
+{
+  "name": "heksens-trylledrik",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Halloween-skattejagt for børn med kameraopgaver. Serveren viser spillet og gemmer holdene i MongoDB.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "mongodb": "^6.8.0"
+  }
+}

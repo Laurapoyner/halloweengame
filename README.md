@@ -10,7 +10,7 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 
 ## Før legen (til den voksne)
 
-1. Åbn **Voksen-menu** nederst. Koden er `1031`.
+1. Åbn **Voksen-menuen** med ⚙️ øverst til højre. Koden er `1031`.
 2. Tryk på holdnavnet øverst, og skriv, hvor mange børn der er på holdet. Det styrer antallet af sprællemænd og flagermus (10 hver).
 
 **Spøgelsesmåleren** virker som "varm og kold".
@@ -30,6 +30,14 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 - På iPhone skal man give lov til "bevægelse og retning", når telefonen spørger. Det gælder alle jagterne.
 - Hold telefonen foran jer, når I går. Så tæller skridttælleren bedst.
 
+**Følg alle hold, og lad et hold prøve igen:** Voksen-menu → **📋 Se alle hold** (kræver serveren nedenfor).
+- Tryk på et hold for at se dets opgaver og billeder.
+- **Slet** en opgave, holdet skal lave om, eller **Godkend** en, der driller.
+- **Slet alt, holdet har lavet** starter holdet forfra. Tryk to gange for at bekræfte.
+- **Brug holdet på denne telefon** flytter et hold til en ny telefon, fx hvis en telefon løber tør for strøm.
+- **Fjern holdet** sletter holdet helt, fx et testhold.
+- Ændringerne dukker op på holdets telefon inden for ca. 10 sekunder.
+
 **Driller en opgave?**
 - Der er et "Voksen: godkend"-link på hver opgave.
 - I Voksen-menuen kan du godkende eller nulstille alle opgaver.
@@ -42,12 +50,27 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 - *Nem tilstand* for de mindste.
 - *Start forfra*.
 
-## Indtal stemmen selv (anbefalet)
+## Pæn AI-stemme uden konto (anbefalet)
 
-Telefonernes egen oplæsning lyder robotagtig. Den nemmeste løsning er at indtale replikkerne selv, så børnene hører en voksen, de kender.
+Telefonernes egen oplæsning lyder robotagtig. Microsoft Edge på en Windows-computer har Microsofts pæne danske AI-stemme **Christel** indbygget. Spillet kan optage den automatisk og lave lydfiler til alle telefoner. Det kræver ingen Azure-konto.
+
+1. Åbn spillet fra jeres egen adresse (fx Render) i **Microsoft Edge** på en Windows-computer, og skru op for lyden.
+2. Gå til **Voksen-menu (⚙️) → Stemme → 🎙️ Indtal stemmen**.
+3. Under *Lad Christel indtale det hele* trykker du **▶ Start**. Vælg **Hele skærmen**, og slå **Del systemlyd** til.
+4. Lad computeren arbejde i fred i ca. 10 minutter. Andre lyde på computeren kommer også med på optagelsen.
+5. Tryk ▶ ud for et par replikker for at høre dem.
+   - Er en replik blevet dårlig, så slet den med ✕, og tryk **▶ Start** igen. Kun de manglende replikker bliver indtalt.
+6. Tryk **⬇️ Hent lydpakke til alle telefoner**. Du får filen `lyd.zip`.
+7. Pak den ud, og læg mappen **`lyd`** i GitHub-repoet ved siden af `index.html` (*Add file → Upload files*).
+
+Vil du hellere have mandestemmen, kan du vælge *Jeppe* under *Stemme* i studiet.
+
+## Indtal stemmen selv
+
+I stedet kan du indtale replikkerne selv, så børnene hører en voksen, de kender.
 
 1. Åbn spillet fra jeres egen adresse (fx Render) på en computer eller telefon med mikrofon.
-2. Gå til **Voksen-menu → Stemme → 🎙️ Indtal stemmen selv**.
+2. Gå til **Voksen-menu → Stemme → 🎙️ Indtal stemmen**, og rul ned til *… eller indtal selv*.
 3. Tryk **● Optag** ud for en replik, læs den højt, og tryk **■ Stop**.
    - Optagelsen afspilles bagefter, og du kan tage den om.
    - Stilhed før og efter klippes væk.
@@ -59,9 +82,9 @@ Telefonernes egen oplæsning lyder robotagtig. Den nemmeste løsning er at indta
 
 Optagelserne ligger også gemt i browseren på den enhed, du indtalte på, så du kan fortsætte senere. GitHub-handlingen "Lav stemmer" overskriver aldrig dine egne optagelser.
 
-## AI-stemme (alternativ)
+## AI-stemme via Azure (avanceret)
 
-I stedet kan du lave **lydfiler med en rigtig dansk AI-stemme** én gang. Så bruger alle telefoner dem automatisk.
+Du kan også lave lydfilerne med en Azure-konto. Det giver samme stemme, men oprettelsen af kontoen kan drille.
 
 **Med GitHub (nemmest, når siden ligger på GitHub):**
 
@@ -94,25 +117,61 @@ Er der ingen lydfiler, bruger spillet den pæneste danske stemme, telefonen selv
 
 ## Prøv det på din computer
 
-Kameraet virker kun på `https://` eller `localhost`. Fra denne mappe:
+Kameraet virker kun på `https://` eller `localhost`. Fra denne mappe (kræver Node.js):
 
 ```bash
-python3 -m http.server 8000
+node server.js
 ```
 
-Åbn http://localhost:8000.
+Åbn http://localhost:3000.
+- Uden `MONGODB_URI` gemmes holdene kun i serverens hukommelse, men ellers virker alt, også *Alle hold*.
+- Med en database: `MONGODB_URI="mongodb+srv://…" node server.js` (kør `npm install` først).
 - Jagterne kan styres uden sensorer: træk med musen eller brug piletasterne for at dreje, og tryk på 👣-knappen eller mellemrumstasten for at gå et skridt.
 
-## Læg det på nettet (via GitHub)
+## Læg det på nettet, og saml alle hold ét sted
 
-1. Opret et repository på GitHub, og læg hele mappen i det (også `stemmer` og `.github`).
-2. Forbind repoet til en af disse (menunavnene kan variere lidt):
-   - **Cloudflare Pages:** opret et Pages-projekt fra GitHub-repoet, lad *build command* være tom, og sæt *output directory* til `/`.
-   - **Render:** vælg *New → Static Site*, lad *build command* være tom, og sæt *publish directory* til `.`.
-3. Du får en `https://`-adresse. Den åbnes på telefonerne. Siden opdateres automatisk, når repoet ændres.
+Spillet kører fra `server.js` på en gratis **Render Web Service** og gemmer alle hold i en gratis **MongoDB Atlas**-database. Hver telefon gemmer også selv, så spillet virker videre, hvis nettet driller.
+
+### 1. Lav databasen (MongoDB Atlas, gratis)
+
+1. Gå til mongodb.com/atlas, og opret en gratis konto (fx med Google).
+2. Opret en klynge (*cluster*): vælg **M0 / Free**, og en region i Europa, fx *Frankfurt* eller *Stockholm*.
+3. Opret en databasebruger, fx brugernavn `heks`. Brug en adgangskode med **kun bogstaver og tal**, og gem den.
+4. Gå til **Network Access → Add IP Address → Allow access from anywhere** (`0.0.0.0/0`). Render har ingen fast adresse, så det er nødvendigt.
+5. Gå til **Connect → Drivers**, og kopiér forbindelsesadressen. Den ligner
+   `mongodb+srv://heks:<db_password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`.
+   Erstat `<db_password>` (inklusive `<` og `>`) med adgangskoden.
+
+### 2. Læg filerne på GitHub
+
+Upload `index.html`, `server.js`, `package.json` og `.gitignore` til repoet (*Add file → Upload files*). Mapperne `stemmer`, `.github` og `lyd` skal også ligge der.
+
+### 3. Lav en Web Service på Render
+
+1. Vælg **New → Web Service**, og vælg GitHub-repoet.
+2. Udfyld:
+   - **Language / Runtime:** Node
+   - **Build Command:** `npm install`
+   - **Start Command:** `node server.js`
+   - **Instance Type:** Free
+3. Under **Environment Variables**: opret `MONGODB_URI` med forbindelsesadressen fra trin 1. Den må kun ligge her, ikke i nogen fil.
+4. Tryk **Create Web Service**. Efter et par minutter får du en ny adresse som `https://halloweengame-xxxx.onrender.com`. Den skal bruges på alle telefoner.
+5. Tjek i spillet: Voksen-menu → *Alle hold* skal vise "Forbundet. Alle hold gemmes samlet i databasen."
+6. Den gamle *Static Site* på Render kan nu slettes (*Settings → Delete*), så ingen bruger den ved en fejl. Den gemmer kun på hver telefon.
+
+Siden opdateres automatisk, når repoet ændres.
+
+**Står der en fejl i Voksen-menuen?**
+- *"afviste brugernavn eller adgangskode"*: tjek, at `<db_password>` er erstattet med den rigtige adgangskode i `MONGODB_URI`.
+- *"svarer ikke"*: tjek Network Access i Atlas (trin 1.4).
+- *"ingen database koblet på endnu"*: `MONGODB_URI` mangler på Render. Holdene gemmes så kun midlertidigt.
+
+**Uden fælles lager:** spillet virker også som en almindelig statisk side (Render *Static Site* med publish directory `.`, eller Cloudflare Pages). Så gemmer hver telefon kun sit eget hold.
 
 ## Godt at vide
 
 - **Kropsgenkendelse:** Googles MediaPipe. Den hentes fra internettet første gang spejlet åbnes (ca. 10 MB), så telefonerne skal have net.
 - **Jagterne** bruger kun telefonens egne sensorer og virker uden net, når siden først er åbnet.
-- **Gemt fremskridt:** ligger lige nu kun på den telefon, holdet bruger. Næste skridt er en lille server med MongoDB, så alt samles ét sted. Gemme-logikken ligger i `store` i `index.html`.
+- **Gemt fremskridt:** hver telefon gemmer selv først og sender ændringerne til serveren, når der er net. Mister serveren sine data, sender telefonerne deres fremskridt op igen.
+- **Render Free sover:** en gratis Web Service falder i søvn efter 15 minutter uden besøg. Det første besøg tager så op til et minut. Åbn siden på telefonerne et par minutter før legen. Mens der spilles, holder telefonerne den vågen.
+- **Kodeord, voksen-kode og nem tilstand** gælder alle hold, når serveren kører. Ændrer du dem på én telefon, får de andre dem også.

@@ -331,6 +331,35 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 .studio-head p{margin:0;color:var(--mist)}
 #studioCount{color:var(--slime);font-weight:800}
 #studioNote{background:var(--dusk);border-radius:12px;padding:10px 12px;color:var(--bone)}
+/* Alle hold (voksen-oversigten) */
+.modal-card.wide{max-width:640px}
+.ov-list{display:flex;flex-direction:column;gap:8px}
+.ov-team{background:var(--night);border:2px solid var(--dusk-2);border-radius:14px}
+.ov-team[open]{border-color:var(--hex)}
+.ov-team summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;min-height:48px}
+.ov-team summary::-webkit-details-marker{display:none}
+.ov-team summary::before{content:'▸';color:var(--mist);transition:transform .2s}
+.ov-team[open] summary::before{transform:rotate(90deg)}
+.ov-name{flex:1;min-width:0;font-weight:800;color:var(--bone);overflow-wrap:anywhere}
+.ov-me{display:inline-block;font-size:.7rem;font-weight:800;color:var(--night);background:var(--moon);border-radius:999px;padding:1px 8px;vertical-align:2px}
+.ov-count{font-weight:800;color:var(--slime);font-variant-numeric:tabular-nums}
+.ov-ago{font-size:.75rem;color:var(--mist);white-space:nowrap}
+.ov-body{display:flex;flex-direction:column;gap:10px;padding:0 10px 12px}
+.ov-body .row{background:var(--dusk);flex-wrap:wrap}
+.ov-body .rn small{display:block;font-weight:500;font-size:.75rem;color:var(--mist)}
+.ov-body .rn{overflow-wrap:anywhere}
+.ov-body .row.is-done .rn small{color:var(--slime);font-weight:700}
+.ov-ph{width:40px;height:40px;object-fit:cover;border-radius:8px;flex:none;background:var(--dusk-2)}
+.ov-acts{display:flex;flex-wrap:wrap;gap:8px}
+#ovStatus.err{color:var(--blood);font-weight:700}
+.auto-box{background:var(--dusk);border:2px solid var(--hex);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.auto-box h3,.own-h{margin:0;color:var(--moon);font-size:1.15rem}
+.own-h{margin-top:8px}
+.auto-box p,.auto-box ol{margin:0;color:var(--mist)}
+.auto-box ol{padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+.auto-box b{color:var(--bone)}
+#autoNote{background:var(--night);border-radius:12px;padding:10px 12px;color:var(--bone);margin:0}
+#autoBtn.running{background:var(--blood);color:var(--night)}
 #studioList{display:flex;flex-direction:column;gap:8px}
 .rec-grp{margin:14px 0 2px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)}
 .rec-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:var(--dusk);border:2px solid var(--dusk-2);border-radius:14px;padding:10px 12px}
@@ -463,7 +492,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 
   <footer class="foot">
     <button id="adultBtn" class="ghost" type="button">Voksen-menu</button>
-    <span class="ver">Version 10</span>
+    <span class="ver">Version 12</span>
   </footer>
 </main>
 
@@ -496,12 +525,26 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   <div class="studio-in">
     <div class="studio-head">
       <h2>Indtal stemmen</h2>
-      <p>Tryk <b>● Optag</b>, læs teksten højt med god Halloween-stemme, og tryk <b>■ Stop</b>. Optagelsen afspilles bagefter, og du kan tage den om. Stilhed før og efter klippes væk.</p>
-      <p>Du behøver ikke indtale det hele. Det, der ikke er indtalt, bliver bare ikke læst op. Start med opgaverne.</p>
+      <section class="auto-box" aria-labelledby="autoH">
+        <h3 id="autoH">🤖 Lad Christel indtale det hele</h3>
+        <p><b>Microsoft Edge</b> på en Windows-computer har Microsofts pæne danske AI-stemme <b>Christel</b> indbygget. Studiet optager den automatisk, replik for replik. Det kræver ingen konto.</p>
+        <ol>
+          <li>Åbn spillet i <b>Microsoft Edge</b> på computeren, og skru op for lyden.</li>
+          <li>Tryk <b>▶ Start</b>. Vælg <b>Hele skærmen</b>, og slå <b>Del systemlyd</b> til.</li>
+          <li>Lad computeren arbejde i fred i ca. 10 minutter. Andre lyde på computeren kommer også med.</li>
+        </ol>
+        <div class="field"><label for="autoVoice">Stemme</label><select id="autoVoice" class="inp"></select></div>
+        <label class="toggle" for="autoAll"><input type="checkbox" id="autoAll"><span>Indtal også de replikker, der allerede er optaget</span></label>
+        <button type="button" class="btn primary" id="autoBtn" data-sact="auto">▶ Start</button>
+        <p id="autoNote" hidden></p>
+      </section>
       <p id="studioCount">0 indtalt</p>
       <div class="actions"><button type="button" class="btn primary" data-sact="zip">⬇️ Hent lydpakke til alle telefoner</button>
         <button type="button" class="btn secondary" data-sact="close">Luk studiet</button></div>
       <p id="studioNote" hidden></p>
+      <h3 class="own-h">… eller indtal selv</h3>
+      <p>Tryk <b>● Optag</b>, læs teksten højt med god Halloween-stemme, og tryk <b>■ Stop</b>. Optagelsen afspilles bagefter, og du kan tage den om. Stilhed før og efter klippes væk.</p>
+      <p>Du behøver ikke indtale det hele. Det, der ikke er indtalt, bliver bare ikke læst op. Start med opgaverne.</p>
     </div>
     <div id="studioList"></div>
   </div>
@@ -825,18 +868,19 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   /*LIVE-LOGIC-END*/
 
   /* ================= Lager =================
-     Lige nu gemmes holdets fremskridt på denne telefon.
-     Senere kan load/save skiftes til fetch('/api/progress') med MongoDB bagved. */
+     Holdets fremskridt gemmes altid først på denne telefon (så spillet virker uden net).
+     Kører spillet fra server.js, sendes ændringerne også til serveren, som samler alle hold i MongoDB
+     (se "Fælles lager på serveren" længere nede). */
   const KEY = 'heksens-trylledrik-v4';
   const DEFAULTS = { team:'Græskarhovederne', players:3, secret:'HALLOWEENGODTERI', pin:'1031', easy:false, autoRead:true, voice:'', rate:1,
-                     order:null, orderFor:'', done:{} };
+                     order:null, orderFor:'', done:{}, teamId:'', pending:[], metaAt:0, settingsAt:0, resetSeen:0 };
   const store = {
     load(){
       try {
         const raw = localStorage.getItem(KEY);
-        if (raw){ const s = JSON.parse(raw); return { ...DEFAULTS, ...s, done: s.done || {} }; }
+        if (raw){ const s = JSON.parse(raw); return { ...DEFAULTS, ...s, done: s.done || {}, pending: Array.isArray(s.pending) ? s.pending : [] }; }
       } catch (e) {}
-      return { ...DEFAULTS, done:{} };
+      return { ...DEFAULTS, done:{}, pending:[] };
     },
     save(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
   };
@@ -1254,8 +1298,9 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   function complete(task, photo, by){
     const before = revealedSet();
     const wasNew = !state.done[task.id];
-    state.done[task.id] = { at: Date.now(), photo, by };
-    store.save(state);
+    const at = serverNow();
+    state.done[task.id] = { at, photo, by, hasPhoto: !!photo };
+    queueOp({ type:'done', task:task.id, at, by, photo: photo || null });
     const after = revealedSet(), L = letters();
     const newLetters = [...after].filter(i => !before.has(i)).map(i => L[i]);
     return { wasNew, newLetters };
@@ -1351,7 +1396,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (a === 'live') openLive(cur.task);
     if (a === 'pminus' || a === 'pplus'){
       state.players = Math.min(8, Math.max(1, (state.players|0) + (a === 'pplus' ? 1 : -1)));
-      store.save(state); renderSheet();
+      queueMeta(); renderSheet();
     }
     if (a === 'approve'){
       shush();
@@ -2579,6 +2624,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     $('#studioList').innerHTML = html;
     studioNote('');
     studioCount();
+    if (!auto) fillAutoVoices();
     el.studio.hidden = false; el.studio.scrollTop = 0;
   }
   async function startRec(k){
@@ -2640,10 +2686,135 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       : `lyd.zip er hentet (${files.length - 1} optagelser). Pak den ud, og læg mappen "lyd" i GitHub-repoet ved siden af index.html.`);
     if (window.__heksZipLog) window.__heksZipLog(zip); // kun til test
   }
+  /* ---------- Lad Christel indtale det hele ----------
+     Microsoft Edge har Microsofts pæne danske AI-stemmer (Christel og Jeppe) indbygget. En side må ikke optage
+     browserens oplæsning direkte, så studiet beder om at dele skærmen med systemlyd og optager den, replik for replik.
+     Optagelserne bliver til almindelige lydfiler i lydpakken, så alle telefoner kan afspille dem. */
+  let auto = null;
+  function autoNote(msg){ const n = $('#autoNote'); if (n){ n.textContent = msg; n.hidden = !msg; } }
+  function setAutoBtn(on){
+    const b = $('#autoBtn'); if (!b) return;
+    b.textContent = on ? '■ Stop' : '▶ Start'; b.dataset.sact = on ? 'autostop' : 'auto'; b.classList.toggle('running', on);
+    ['#autoVoice', '#autoAll'].forEach(s => { const x = $(s); if (x) x.disabled = on; });
+  }
+  function fillAutoVoices(){
+    const sel = $('#autoVoice');
+    if (!sel) return;
+    if (speech.ok) loadVoices();
+    const vs = speech.voices, best = vs.find(v => /christel/i.test(v.name)) || vs[0];
+    sel.innerHTML = vs.length
+      ? vs.map(v => `<option value="${esc(v.voiceURI)}"${v === best ? ' selected' : ''}>${esc(v.name)}</option>`).join('')
+      : '<option value="">Ingen dansk stemme i denne browser</option>';
+    autoNote(vs.some(v => /online|natural/i.test(v.name)) ? ''
+      : 'Denne browser har ikke Christel-stemmen. Åbn spillet i Microsoft Edge på en computer for at bruge den.');
+  }
+  if (speech.ok){ try { speechSynthesis.addEventListener('voiceschanged', () => { if (!el.studio.hidden && !auto) fillAutoVoices(); }); } catch (e) {} }
+
+  // Læser én replik op og venter, til den er færdig
+  function sayAndWait(text, voice){
+    return new Promise(res => {
+      const plain = String(text).replace(/[–—…]/g, ', ').replace(/\s+/g, ' ').trim();
+      let done = false;
+      const fin = () => { if (!done){ done = true; clearTimeout(to); res(); } };
+      const to = setTimeout(fin, 5000 + plain.length * 160);
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(plain);
+        u.lang = voice.lang || 'da-DK'; u.voice = voice; u.rate = .95; u.pitch = 1;
+        u.onend = fin; u.onerror = fin;
+        speechSynthesis.speak(u);
+      } catch (e) { fin(); }
+    });
+  }
+
+  async function startAuto(){
+    if (auto || recState) return;
+    const sel = $('#autoVoice');
+    const voice = speech.voices.find(v => v.voiceURI === (sel && sel.value)) || speech.voices[0];
+    if (!speech.ok || !voice){ autoNote('Denne browser har ingen dansk stemme. Åbn spillet i Microsoft Edge på en computer.'); return; }
+    if (inFrame){ autoNote('Det virker ikke på test-siden her i Claude. Åbn spillet fra jeres egen adresse i Microsoft Edge.'); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder){
+      autoNote('Denne browser kan ikke optage computerens lyd. Brug Microsoft Edge på en Windows-computer.'); return;
+    }
+    unlockAudio(); shush();
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        video:true, audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false },
+        systemAudio:'include', selfBrowserSurface:'include', monitorTypeSurfaces:'include', surfaceSwitching:'exclude' });
+    } catch (e) {
+      autoNote('Optagelsen blev ikke startet. Tryk ▶ Start igen, vælg "Hele skærmen", og slå "Del systemlyd" til.'); return;
+    }
+    const tracks = stream.getAudioTracks();
+    if (!tracks.length){
+      stream.getTracks().forEach(t => t.stop());
+      autoNote('Der kom ingen lyd med. Tryk ▶ Start igen, vælg "Hele skærmen" (ikke en fane eller et vindue), og slå "Del systemlyd" til.'); return;
+    }
+    const all = $('#autoAll') && $('#autoAll').checked;
+    const keys = studioKeys().filter(k => all || !rec.keys.has(k));
+    if (!keys.length){
+      stream.getTracks().forEach(t => t.stop());
+      autoNote('Alle replikker er allerede indtalt. Sæt flueben ovenfor, hvis Christel skal indtale dem igen.'); return;
+    }
+    // En lydmåler fortæller, hvornår der bliver talt, og hvornår der er stille igen
+    const astream = new MediaStream(tracks), src = actx.createMediaStreamSource(astream), an = actx.createAnalyser();
+    an.fftSize = 1024; src.connect(an);
+    const buf = new Float32Array(an.fftSize);
+    const me = auto = { stop:false, lastLoud:0, heard:false };
+    const meter = setInterval(() => {
+      an.getFloatTimeDomainData(buf);
+      let pk = 0; for (let i = 0; i < buf.length; i++) pk = Math.max(pk, Math.abs(buf[i]));
+      if (pk > .02){ me.lastLoud = performance.now(); me.heard = true; }
+    }, 40);
+    tracks[0].addEventListener('ended', () => { me.stop = true; try { speechSynthesis.cancel(); } catch (e) {} });
+    setAutoBtn(true);
+    const name = (voice.name.match(/Microsoft (\w+)/) || [, 'Stemmen'])[1];
+    let ok = 0, silent = 0, problem = '';
+    for (let i = 0; i < keys.length && !me.stop; i++){
+      const k = keys[i];
+      autoNote(`${name} indtaler ${i + 1} af ${keys.length}: »${lineText(k)}«`);
+      const chunks = [], mr = new MediaRecorder(astream);
+      mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      const stopped = new Promise(r => { mr.onstop = r; });
+      mr.start();
+      await wait(250);
+      me.heard = false;
+      await sayAndWait(lineText(k), voice);
+      // Onlinestemmen kan tale lidt videre efter "færdig" – vent, til der har været stille et øjeblik
+      const tEnd = performance.now();
+      while (!me.stop && performance.now() - Math.max(me.lastLoud, tEnd) < 500 && performance.now() - tEnd < 4000) await wait(50);
+      try { mr.stop(); } catch (e) {}
+      await stopped;
+      if (me.stop) break;
+      if (!me.heard){
+        silent++;
+        if (!ok && silent >= 2){ problem = 'Der kom ingen lyd med på optagelsen. Tjek, at lyden er skruet op, at du valgte "Hele skærmen", og at "Del systemlyd" var slået til. Tryk så ▶ Start igen.'; break; }
+        continue;
+      }
+      try {
+        const wav = toWav(await decodeAudio(await new Blob(chunks, { type: mr.mimeType || 'audio/webm' }).arrayBuffer()));
+        await recPut(k, wav);
+        rec.keys.add(k); pack.bufs.delete('rec:' + k);
+        refreshRow(k); ok++;
+      } catch (e) { silent++; }
+    }
+    clearInterval(meter);
+    try { src.disconnect(); } catch (e) {}
+    stream.getTracks().forEach(t => t.stop());
+    try { speechSynthesis.cancel(); } catch (e) {}
+    auto = null; setAutoBtn(false);
+    if (problem) autoNote(problem);
+    else if (me.stop) autoNote(`Stoppet. ${ok} replikker blev indtalt. Tryk ▶ Start for at fortsætte, hvor ${name} slap.`);
+    else autoNote(`Færdig! ${name} har indtalt ${ok} replikker${silent ? ` (${silent} gik galt – tryk ▶ Start igen for at prøve dem en gang til)` : ''}. Tryk ▶ på en replik for at høre den, og tryk så "Hent lydpakke til alle telefoner".`);
+  }
+
   el.studio.addEventListener('click', async e => {
     const a = e.target.closest('[data-ract],[data-sact]');
     if (!a) return;
-    if (a.dataset.sact === 'close'){ if (recState) await stopRec(); el.studio.hidden = true; shush(); return; }
+    if (a.dataset.sact === 'auto'){ startAuto(); return; }
+    if (a.dataset.sact === 'autostop'){ if (auto){ auto.stop = true; try { speechSynthesis.cancel(); } catch (err) {} } return; }
+    if (auto && (a.dataset.ract === 'rec' || a.dataset.sact === 'zip')){ autoNote('Vent, til Christel er færdig – eller tryk ■ Stop.'); return; }
+    if (a.dataset.sact === 'close'){ if (auto){ auto.stop = true; try { speechSynthesis.cancel(); } catch (err) {} } if (recState) await stopRec(); el.studio.hidden = true; shush(); return; }
     if (a.dataset.sact === 'zip'){ if (recState) await stopRec(); downloadPack(); return; }
     const k = a.closest('.rec-row').dataset.key, act = a.dataset.ract;
     if (act === 'rec') startRec(k);
@@ -2654,6 +2825,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 
   /* ================= Dialoger ================= */
   function openModal(html, mount){
+    el.modalCard.classList.remove('wide');
     el.modalCard.innerHTML = html;
     el.modal.hidden = false;
     mount && mount(el.modalCard);
@@ -2672,10 +2844,18 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         <div class="actions"><button class="btn primary" type="submit">Fortsæt</button>
         <button class="btn secondary" type="button" data-act="mclose">Annuller</button></div>
       </form>`, card => {
-      card.querySelector('#pinForm').addEventListener('submit', e => {
+      card.querySelector('#pinForm').addEventListener('submit', async e => {
         e.preventDefault();
-        const inp = card.querySelector('#pinIn');
-        if (inp.value.trim() === String(state.pin)){ closeModal(); onOk(); }
+        const inp = card.querySelector('#pinIn'), v = inp.value.trim();
+        let ok = !!v && v === String(state.pin);
+        // Koden kan være ændret på en anden telefon: spørg serveren, hvis der er en
+        if (!ok && v && serverUsable()){
+          try {
+            const r = await fetch('api/pin', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ kode:v }), cache:'no-store' });
+            if ((await r.json()).ok){ ok = true; state.pin = v; store.save(state); }
+          } catch (err) {}
+        }
+        if (ok){ closeModal(); onOk(); }
         else { card.querySelector('#pinErr').textContent = 'Forkert kode. Prøv igen.'; inp.value = ''; inp.focus(); }
       });
     });
@@ -2698,7 +2878,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         const n = parseInt(card.querySelector('#playersIn').value, 10);
         if (v) state.team = v;
         if (n >= 1) state.players = Math.min(8, n);
-        store.save(state);
+        queueMeta();
         closeModal(); renderAll();
       });
     });
@@ -2707,8 +2887,8 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   const rateLabel = r => r < .88 ? 'Langsomt' : r > 1.07 ? 'Hurtigt' : 'Normalt';
   function voiceFields(){
     const own = rec.keys.size;
-    const studio = `<button type="button" class="btn primary" data-act="studio">🎙️ Indtal stemmen selv${own ? ` (${own} optaget)` : ''}</button>
-      <p class="help">Læs replikkerne op med din egen stemme. ${own ? 'Dine optagelser bruges allerede på denne enhed. Hent lydpakken i studiet, og læg den på GitHub, så alle telefoner bruger dem.' : 'Optagelserne kan hentes som en lydpakke og lægges på GitHub, så alle telefoner bruger dem.'}</p>`;
+    const studio = `<button type="button" class="btn primary" data-act="studio">🎙️ Indtal stemmen${own ? ` (${own} optaget)` : ''}</button>
+      <p class="help">Lad Microsofts danske AI-stemme <b>Christel</b> indtale det hele automatisk (kræver Microsoft Edge på en computer), eller læs op selv. ${own ? 'Optagelserne bruges allerede på denne enhed. Hent lydpakken i studiet, og læg den på GitHub, så alle telefoner bruger dem.' : 'Optagelserne hentes som en lydpakke og lægges på GitHub, så alle telefoner bruger dem.'}</p>`;
     if (pack.ready){
       return `${studio}<p class="help"><b>Lydfilerne er fundet</b>${pack.voice ? ` (stemme: ${esc(pack.voice)})` : ''}. Spillet bruger dem på alle telefoner i stedet for telefonens egen stemme.</p>
         <button type="button" class="btn secondary" data-act="voicetest">▶ Prøv stemmen</button>`;
@@ -2724,13 +2904,14 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       <div class="field"><label for="rateIn">Tempo: <span id="rateOut">${rateLabel(rate)}</span></label>
         <input id="rateIn" type="range" min="0.75" max="1.2" step="0.05" value="${rate}"></div>
       <button type="button" class="btn secondary" data-act="voicetest">▶ Prøv stemmen</button>
-      <p class="help">Uden optagelser bruges enhedens egen stemme. Alternativt kan I lave <b>lydfiler med en AI-stemme</b> – se afsnittet "Pæn stemme" i README-filen.</p>`;
+      <p class="help">Uden optagelser bruges enhedens egen stemme.</p>`;
   }
 
   function applyAdultFields(){
     const c = el.modalCard;
     const sec = c.querySelector('#secretIn');
     if (!sec) return;
+    const before = { secret: state.secret, pin: state.pin, easy: state.easy };
     const word = sec.value.toUpperCase().replace(/[^A-ZÆØÅ]/g, '');
     if (word) state.secret = word;
     const p = c.querySelector('#pinNew').value.trim();
@@ -2741,6 +2922,13 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (vIn){ state.voice = vIn.value; loadVoices(); }
     if (rIn) state.rate = parseFloat(rIn.value) || 1;
     store.save(state);
+    // Kodeord, voksen-kode og nem tilstand gælder alle hold, så de sendes til serveren
+    if (state.secret !== before.secret || state.pin !== before.pin || state.easy !== before.easy){
+      const op = { type:'settings', kode: before.pin, secret: state.secret, easy: state.easy };
+      if (state.pin !== before.pin) op.pin = state.pin;
+      queueOp(op);
+      state.settingsAt = op.at; store.save(state);
+    }
   }
 
   function testDone(task){
@@ -2762,7 +2950,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }).join('')}</div>`;
     openModal(`<h2>Voksen-menu</h2>
       <p class="muted">Hold ${esc(state.team)} · ${doneCount()} af ${TASKS.length} klaret</p>
-      <div class="field"><span class="flabel">Godkend eller nulstil en opgave, der driller</span></div>
+      <h3>Alle hold</h3>
+      <p class="help" id="syncInfo">${esc(syncText())}</p>
+      ${serverUsable() ? '<button type="button" class="btn primary" data-act="overview">📋 Se alle hold</button>' : ''}
+      <h3>Dette hold</h3>
+      <div class="field"><span class="flabel">Godkend en opgave, der driller, eller slet en, holdet skal prøve igen</span></div>
       ${group('photo')}${group('hunt')}
       <div class="testbox"><span class="flabel">Test en fangst uden at gå rundt</span>
         <p class="help">Væsenet dukker op lige foran kameraet. Opgaven bliver ikke markeret som klaret.</p>
@@ -2803,7 +2995,9 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       if (t) openLive(t, { test:true });
       return;
     }
-    if (act === 'tadult'){ renderAdult(); return; }
+    if (act === 'tadult'){ clearInterval(ov.timer); renderAdult(); return; }
+    if (act === 'overview'){ applyAdultFields(); openOverview(); return; }
+    if (act.startsWith('ov')){ ovAction(a, act); return; }
     if (act === 'voicetest'){
       unlockAudio();
       if (hasAudio('test')){ talk(['test'], true); return; }
@@ -2814,13 +3008,15 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (act === 'grant' || act === 'undo'){
       applyAdultFields();
       const scroll = el.modalCard.scrollTop;
-      if (act === 'grant') state.done[a.dataset.id] = { at: Date.now(), photo: null, by: 'voksen' };
-      else delete state.done[a.dataset.id];
-      store.save(state); renderAdult(); el.modalCard.scrollTop = scroll; renderAll();
+      const id = a.dataset.id;
+      if (act === 'grant'){ const at = serverNow(); state.done[id] = { at, photo: null, by: 'voksen' }; queueOp({ type:'done', task:id, at, by:'voksen' }); }
+      else { delete state.done[id]; queueOp({ type:'undo', task:id, kode: state.pin }); }
+      renderAdult(); el.modalCard.scrollTop = scroll; renderAll();
     }
     if (act === 'reset'){
       if (a.dataset.armed){
-        state.done = {}; state.order = null; store.save(state); shownSet = null;
+        state.done = {}; state.order = null; shownSet = null;
+        queueOp({ type:'reset', kode: state.pin });
         closeModal(); renderAll();
       } else {
         a.dataset.armed = '1';
@@ -2830,12 +3026,321 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
   });
 
-  /* ================= Finale ================= */
-  function showFinale(){
-    const photos = TASKS.map(t => {
-      const p = state.done[t.id] && state.done[t.id].photo;
-      return p ? `<img src="${p}" alt="${esc(t.name)}">` : `<span class="gal-empty" aria-hidden="true">${t.icon}</span>`;
+  /* ================= Fælles lager på serveren (MongoDB) =================
+     Telefonen gemmer altid alt selv først, så spillet virker uden net. Hver ændring lægges i en kø (state.pending)
+     og sendes til serveren (server.js), som samler alle hold ét sted. Serveren bestemmer: sletter en voksen en
+     opgave på en anden telefon, forsvinder den også her. Tidsstempler er i serverens tid, så en sletning kan
+     sammenlignes med, hvornår opgaven blev løst. Uden server (fx en statisk side) kører spillet bare videre lokalt. */
+  const sync = { status: inFrame ? 'none' : 'start', db:'', busy:false, p:null, timer:0, offset:0, fails:0, photosAt:0, error:'' };
+  const serverNow = () => Math.round(Date.now() + sync.offset);
+  const serverUsable = () => !inFrame && sync.status !== 'none';
+  const TEAM_NAMES = ['Græskarhovederne','Flagermusene','Heksebanden','Spøgelserne','Edderkopperne','Zombierne','Mumierne','Varulvene','Troldkarlene','Skeletterne'];
+  const randomTeamName = () => TEAM_NAMES[Math.floor(Math.random() * TEAM_NAMES.length)];
+  function newTeamId(){
+    try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return 'h' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+  }
+  function ensureTeamId(){
+    if (state.teamId) return;
+    state.teamId = newTeamId();
+    // Flere telefoner skal ikke alle hedde det samme: et nyt hold får et tilfældigt Halloween-navn
+    if (state.team === DEFAULTS.team && !Object.keys(state.done).length) state.team = randomTeamName();
+    state.metaAt = serverNow();
+    store.save(state);
+  }
+  function queueOp(op){
+    ensureTeamId();
+    if (!op.at) op.at = serverNow();
+    state.pending.push(op);
+    store.save(state);
+    if (serverUsable()) syncSoon(250);
+  }
+  function queueMeta(){
+    const op = { type:'meta', name: state.team, players: state.players, at: serverNow() };
+    state.metaAt = op.at;
+    state.pending = state.pending.filter(o => o.type !== 'meta');   // kun den nyeste tæller
+    queueOp(op);
+  }
+  function syncSoon(ms){ clearTimeout(sync.timer); sync.timer = setTimeout(syncNow, ms); }
+
+  function syncNow(){
+    if (!serverUsable()) return Promise.resolve();
+    if (sync.busy) return sync.p;
+    sync.busy = true;
+    sync.p = (async () => {
+      ensureTeamId();
+      const teamId = state.teamId, ops = state.pending.slice(0, 6);
+      let more = false;
+      try {
+        const t0 = Date.now();
+        const r = await fetch('api/sync', { method:'POST', headers:{ 'Content-Type':'application/json' }, cache:'no-store',
+          body: JSON.stringify({ team: teamId, name: state.team, players: state.players, ops }) });
+        const t1 = Date.now();
+        const isJson = (r.headers.get('content-type') || '').includes('json');
+        if (!isJson && (r.status === 404 || r.status === 405 || r.status === 501 || r.ok)){ sync.status = 'none'; throw 0; } // ingen server
+        const j = await r.json();
+        if (!r.ok){ sync.status = 'down'; sync.error = j.message || ''; throw 0; }
+        sync.offset = j.now - (t0 + t1) / 2;
+        if (state.teamId === teamId){
+          state.pending.splice(0, ops.length);
+          applyServer(j);
+        }
+        sync.status = 'ok'; sync.db = j.db || ''; sync.error = ''; sync.fails = 0;
+        more = state.pending.length > 0;
+      } catch (e) {
+        if (e !== 0){ sync.status = 'down'; sync.error = ''; }   // intet net, eller serveren er ved at starte
+        sync.fails++;
+      }
+      sync.busy = false;
+      updateSyncInfo();
+      if (sync.status === 'none') return;
+      const next = more ? 150 : sync.status === 'ok' ? 10000 : Math.min(60000, 4000 * sync.fails);
+      if (more || document.visibilityState !== 'hidden') syncSoon(next);
+    })();
+    return sync.p;
+  }
+
+  function applyServer(j){
+    const t = j.team;
+    if (!t || t.id !== state.teamId) return;
+    let changed = false;
+    if (j.badKode) state.pin = '';   // voksen-koden er ændret på en anden telefon – næste gang spørges serveren
+    // Fælles indstillinger (kodeord og nem tilstand) gælder alle hold
+    if (j.settings && j.settings.at > (state.settingsAt || 0) && !state.pending.some(op => op.type === 'settings')){
+      if (state.secret !== j.settings.secret || state.easy !== j.settings.easy) changed = true;
+      state.secret = j.settings.secret; state.easy = !!j.settings.easy; state.settingsAt = j.settings.at;
+    }
+    if (j.wasDeleted){
+      // En voksen har fjernet holdet: start forfra
+      state.done = {}; state.order = null; shownSet = null;
+      state.pending = state.pending.filter(op => op.type === 'settings' || op.type === 'meta');
+      changed = true;
+    } else if (j.created){
+      // Serveren kendte ikke holdet (fx en ny database): send det, telefonen allerede har løst
+      const missing = Object.entries(state.done).filter(([k]) => !(t.done || {})[k]);
+      if (missing.length){
+        for (const [task, d] of missing) state.pending.push({ type:'done', task, at: d.at || serverNow(), by: d.by || '', photo: d.photo || null });
+        store.save(state);
+        return;
+      }
+    }
+    if ((t.metaAt || 0) > (state.metaAt || 0) && !state.pending.some(op => op.type === 'meta')){
+      if (state.team !== t.name || state.players !== t.players) changed = true;
+      state.team = t.name; state.players = t.players; state.metaAt = t.metaAt;
+    }
+    // Serverens opgaver + det, der endnu ikke er sendt
+    const old = state.done, next = {};
+    for (const [k, d] of Object.entries(t.done || {})){
+      const o = old[k];
+      next[k] = { at: d.at, by: d.by, hasPhoto: !!d.hasPhoto, photo: o && o.at === d.at ? (o.photo || null) : null };
+    }
+    for (const op of state.pending){
+      if (op.type === 'done') next[op.task] = { at: op.at, by: op.by, hasPhoto: !!op.photo, photo: op.photo || null };
+      else if (op.type === 'undo') delete next[op.task];
+      else if (op.type === 'reset') for (const k of Object.keys(next)) delete next[k];
+    }
+    const sig = d => Object.keys(d).sort().map(k => k + ':' + d[k].at).join('|');
+    if (sig(next) !== sig(old)) changed = true;
+    state.done = next;
+    if ((t.resetAt || 0) > (state.resetSeen || 0)){ state.resetSeen = t.resetAt; state.order = null; shownSet = null; }
+    store.save(state);
+    if (changed) onRemoteChange();
+    if (Object.values(next).some(d => d.hasPhoto && !d.photo)) fetchPhotos(false);
+  }
+
+  // Noget er ændret på serveren (fx af en voksen på en anden telefon): vis det med det samme
+  function onRemoteChange(){
+    renderAll();
+    if (cur && !el.sheet.hidden){
+      const isDone = !!state.done[cur.task.id];
+      if (cur.phase === 'done' && !isDone){ cur.phase = 'intro'; renderSheet(); }
+      else if (cur.phase === 'intro' && isDone){ cur.phase = 'done'; renderSheet(); }
+    }
+  }
+
+  async function fetchPhotos(force){
+    if (!serverUsable() || (!force && Date.now() - sync.photosAt < 60000)) return;
+    sync.photosAt = Date.now();
+    try {
+      const r = await fetch('api/photos?team=' + encodeURIComponent(state.teamId), { cache:'no-store' });
+      const j = await r.json();
+      let any = false;
+      for (const [k, data] of Object.entries(j.photos || {})){ const d = state.done[k]; if (d && !d.photo){ d.photo = data; any = true; } }
+      if (any) store.save(state);
+    } catch (e) {}
+  }
+
+  function syncText(){
+    if (inFrame) return 'Her på test-siden gemmes fremskridtet kun i browseren.';
+    const n = state.pending.length, wait = n ? ` ${n} ${n === 1 ? 'ændring venter' : 'ændringer venter'} på at blive sendt.` : '';
+    if (sync.status === 'none') return 'Spillet kører uden server, så fremskridtet gemmes kun på denne telefon. Læg spillet på en Render Web Service med MongoDB (se README) for at samle alle hold ét sted.';
+    if (sync.status === 'ok') return sync.db === 'memory'
+      ? 'Forbundet til serveren, men der er ingen database koblet på endnu. Holdene glemmes, når serveren genstarter (telefonerne sender dem op igen). Sæt MONGODB_URI på Render.' + wait
+      : 'Forbundet. Alle hold gemmes samlet i databasen.' + wait;
+    if (sync.status === 'down') return `Kan ikke nå serveren lige nu${sync.error ? ` (${sync.error})` : ''}. Fremskridtet gemmes på telefonen og sendes, når forbindelsen er tilbage.` + wait;
+    return 'Forbinder til serveren …';
+  }
+  function updateSyncInfo(){ const s = el.modalCard.querySelector('#syncInfo'); if (s) s.textContent = syncText(); }
+
+  /* ---------- Alle hold (for voksne) ---------- */
+  const ov = { teams:[], db:'', timer:0, photos:new Map(), err:'' };
+  async function adminFetch(url, body){
+    const r = await fetch(url, { method: body ? 'POST' : 'GET', cache:'no-store',
+      headers:{ 'Content-Type':'application/json', 'X-Kode': String(state.pin || '') }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401){ const e = new Error('kode'); e.kode = true; throw e; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || j.error || 'HTTP ' + r.status);
+    return j;
+  }
+  function ago(ts){
+    const s = Math.max(0, (serverNow() - ts) / 1000);
+    if (s < 60) return 'lige nu';
+    if (s < 3600) return `for ${Math.round(s / 60)} min. siden`;
+    if (s < 86400) return `for ${Math.round(s / 3600)} t. siden`;
+    return new Date(ts).toLocaleDateString('da-DK', { day:'numeric', month:'short' });
+  }
+  const byLabel = by => ({ voksen:'godkendt af en voksen', heks:'heksen tjekkede billedet', foto:'billede', jagt:'fanget', spejl:'klaret i spejlet' })[by] || '';
+
+  function openOverview(){
+    clearInterval(ov.timer);
+    ov.err = '';
+    openModal(`<h2>Alle hold</h2>
+      <p class="muted" id="ovStatus">Henter holdene …</p>
+      <div class="ov-list" id="ovList"></div>
+      <div class="actions"><button type="button" class="btn secondary" data-act="ovnew">＋ Nyt hold på denne telefon</button>
+        <button type="button" class="btn secondary" data-act="tadult">Tilbage til voksen-menuen</button></div>`);
+    el.modalCard.classList.add('wide');
+    loadOverview();
+    ov.timer = setInterval(() => {
+      if (el.modal.hidden || !el.modalCard.querySelector('#ovList')){ clearInterval(ov.timer); return; }
+      loadOverview();
+    }, 10000);
+  }
+  async function loadOverview(){
+    try {
+      const j = await adminFetch('api/admin/teams');
+      ov.teams = j.teams || []; ov.db = j.db || ''; ov.err = '';
+    } catch (e) {
+      ov.err = e.kode ? 'Voksen-koden passer ikke med serverens (den er måske ændret på en anden telefon). Luk menuen, og åbn den igen med den nye kode.'
+        : 'Kan ikke nå serveren lige nu. Prøver igen om lidt …';
+      if (e.kode) state.pin = '';
+    }
+    renderOverview();
+  }
+  function teamCard(t, open){
+    const me = t.id === state.teamId, done = t.done || {}, n = Object.keys(done).length;
+    const rows = TASKS.map(task => {
+      const d = done[task.id];
+      return `<div class="row${d ? ' is-done' : ''}"><span aria-hidden="true">${task.icon}</span>
+        <span class="rn">${esc(task.name)}<small>${d ? esc(['✓ Klaret', byLabel(d.by), ago(d.at)].filter(Boolean).join(' · ')) : 'Mangler'}</small></span>
+        ${d && d.hasPhoto ? `<img class="ov-ph" data-ph="${task.id}" alt="">` : ''}
+        <button type="button" class="btn secondary small" data-act="${d ? 'ovundo' : 'ovgrant'}" data-team="${esc(t.id)}" data-id="${task.id}">${d ? 'Slet' : 'Godkend'}</button></div>`;
     }).join('');
+    return `<details class="ov-team" data-team="${esc(t.id)}"${open ? ' open' : ''}>
+      <summary><span class="ov-name">${esc(t.name)}${me ? ' <span class="ov-me">denne telefon</span>' : ''}</span>
+        <span class="ov-count">${n}/${TASKS.length}</span><span class="ov-ago">${t.updated ? ago(t.updated) : ''}</span></summary>
+      <div class="ov-body">
+        <div class="rows">${rows}</div>
+        <div class="ov-acts">
+          <button type="button" class="btn secondary small" data-act="ovreset" data-team="${esc(t.id)}" ${n ? '' : 'disabled'}>Slet alt, holdet har lavet</button>
+          ${me ? '' : `<button type="button" class="btn secondary small" data-act="ovuse" data-team="${esc(t.id)}">Brug holdet på denne telefon</button>`}
+          <button type="button" class="btn secondary small" data-act="ovdel" data-team="${esc(t.id)}">Fjern holdet</button>
+        </div>
+      </div></details>`;
+  }
+  function renderOverview(){
+    const list = el.modalCard.querySelector('#ovList');
+    if (!list) return;
+    const open = new Set([...list.querySelectorAll('details[open]')].map(d => d.dataset.team));
+    const scroll = el.modalCard.scrollTop;
+    const status = el.modalCard.querySelector('#ovStatus');
+    status.textContent = ov.err || `${ov.teams.length} ${ov.teams.length === 1 ? 'hold' : 'hold'} · tryk på et hold for at se opgaverne · opdateres af sig selv` +
+      (ov.db === 'memory' ? '. OBS: Der er ingen database koblet på endnu (MONGODB_URI).' : '');
+    status.classList.toggle('err', !!ov.err);
+    if (!ov.err || ov.teams.length){
+      list.innerHTML = ov.teams.length ? ov.teams.map(t => teamCard(t, open.has(t.id))).join('')
+        : '<p class="help">Ingen hold endnu. Holdene dukker op her, så snart en telefon har åbnet spillet.</p>';
+    }
+    el.modalCard.scrollTop = scroll;
+    list.querySelectorAll('details[open]').forEach(d => showOvPhotos(d.dataset.team));
+  }
+  async function showOvPhotos(id){
+    let p = ov.photos.get(id);
+    if (!p || Date.now() - p.t > 30000){
+      p = { t: Date.now(), q: fetch('api/photos?team=' + encodeURIComponent(id), { cache:'no-store' }).then(r => r.json()).then(j => j.photos || {}).catch(() => ({})) };
+      ov.photos.set(id, p);
+    }
+    const photos = await p.q;
+    const d = el.modalCard.querySelector(`details[data-team="${CSS.escape(id)}"]`);
+    if (d) d.querySelectorAll('img[data-ph]').forEach(img => { const src = photos[img.dataset.ph]; if (src && img.getAttribute('src') !== src) img.src = src; });
+  }
+  el.modal.addEventListener('toggle', e => {
+    const d = e.target;
+    if (d && d.matches && d.matches('details.ov-team') && d.open) showOvPhotos(d.dataset.team);
+  }, true);
+
+  // Skift denne telefon til et andet (eller et helt nyt) hold
+  async function switchTeam(t){
+    if (sync.busy) await sync.p;
+    if (state.pending.some(op => op.type !== 'settings')) await syncNow();
+    if (state.pending.some(op => op.type !== 'settings')) throw new Error('venter');
+    state.teamId = t ? t.id : newTeamId();
+    state.team = t ? t.name : randomTeamName();
+    state.players = t ? t.players : 3;
+    state.metaAt = t ? (t.metaAt || 0) : serverNow();
+    state.done = {}; state.order = null; state.resetSeen = 0; shownSet = null;
+    store.save(state);
+    renderAll();
+    await syncNow();
+    fetchPhotos(true);
+  }
+
+  async function ovAction(a, act){
+    const id = a.dataset.team, task = a.dataset.id;
+    if ((act === 'ovreset' || act === 'ovdel') && !a.dataset.armed){
+      const txt = a.textContent;
+      a.dataset.armed = '1';
+      a.textContent = act === 'ovdel' ? 'Tryk igen: fjern holdet og alt, det har lavet' : 'Tryk igen: slet alle opgaver og billeder';
+      setTimeout(() => { if (a.isConnected && a.dataset.armed){ delete a.dataset.armed; a.textContent = txt; } }, 4000);
+      return;
+    }
+    a.disabled = true;
+    try {
+      if (act === 'ovnew' || act === 'ovuse'){
+        await switchTeam(act === 'ovuse' ? ov.teams.find(x => x.id === id) : null);
+        closeModal(); renderAll();
+        if (act === 'ovnew') editTeam();
+        return;
+      }
+      if (act === 'ovdel') await adminFetch('api/admin/delete', { team:id });
+      else {
+        const op = act === 'ovundo' ? { type:'undo', task } : act === 'ovgrant' ? { type:'done', task, by:'voksen' } : { type:'reset' };
+        op.at = serverNow();
+        await adminFetch('api/admin/team', { team:id, ops:[op] });
+      }
+      ov.photos.delete(id);
+      if (id === state.teamId) syncNow();   // denne telefons eget hold: vis ændringen med det samme
+      await loadOverview();
+    } catch (e) {
+      ov.err = e.kode ? 'Voksen-koden passer ikke med serverens. Luk menuen, og åbn den igen med den nye kode.'
+        : e.message === 'venter' ? 'Denne telefon har ændringer, der ikke er sendt til serveren endnu. Prøv igen, når der er forbindelse.'
+        : 'Det lykkedes ikke. Tjek forbindelsen, og prøv igen.';
+      a.disabled = false;
+      renderOverview();
+    }
+  }
+
+  /* ================= Finale ================= */
+  const galleryHTML = () => TASKS.map(t => {
+    const p = state.done[t.id] && state.done[t.id].photo;
+    return p ? `<img src="${p}" alt="${esc(t.name)}">` : `<span class="gal-empty" aria-hidden="true">${t.icon}</span>`;
+  }).join('');
+  function showFinale(){
+    const photos = galleryHTML();
+    // Mangler der billeder (fx hvis holdet er flyttet til en ny telefon), hentes de fra serveren
+    if (Object.values(state.done).some(d => d.hasPhoto && !d.photo)) fetchPhotos(true).then(() => {
+      const g = el.finaleIn.querySelector('.gallery'); if (g && !el.finale.hidden) g.innerHTML = galleryHTML();
+    });
     el.finaleIn.innerHTML = `<p class="label">Hold ${esc(state.team)}</p>
       <h2>Alt er fyldt!</h2>
       <p class="finale-lede">Spøgelsesglasset, trylledrikken og månen er fyldt. Løb hen til en voksen og sig kodeordet højt:</p>
@@ -2882,6 +3387,12 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
   });
   if (window.__heksFakeDetector || window.__heksVoiceLog) window.__heksLive = () => L; // kun til test
+  if (window.__heksVoiceLog) window.__heksSync = () => ({ sync, state, syncNow }); // kun til test
+
+  // Fælles lager: hent holdets stand fra serveren nu, når telefonen kommer på net igen, og når siden vises igen
+  if (serverUsable()){ ensureTeamId(); syncNow(); }
+  window.addEventListener('online', () => syncNow());
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncNow(); });
 
   renderAll();
 })();
