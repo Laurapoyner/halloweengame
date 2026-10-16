@@ -24,6 +24,7 @@ const TASK_RE = /^[a-z0-9-]{1,40}$/;
 const MAX_PHOTO = 600 * 1024;          // et billede fra spillet fylder typisk 20–60 kB
 const MAX_BODY = 4 * 1024 * 1024;
 const MAX_OPS = 40;
+const PIC = 'holdbillede';            // holdbilledet gemmes sammen med opgavebillederne under dette navn
 
 /* ================= Reglerne for ændringer (de samme, uanset hvor holdene gemmes) ================= */
 const cleanName = n => String(n == null ? '' : n).trim().slice(0, 40) || 'Hold';
@@ -40,6 +41,7 @@ function newTeam(id, name, players, now){
    - undo:     en voksen sletter én opgave.           (kræver voksen-koden)
    - reset:    en voksen sletter alt, holdet har lavet. (kræver voksen-koden)
    - meta:     holdets navn og antal børn.
+   - teampic:  holdbilledet (eller intet billede).
    - settings: fælles kodeord, voksen-kode og nem tilstand for alle hold. (kræver voksen-koden) */
 function applyOps(team, ops, settings, adminOk, now){
   const out = { photos: new Map(), settings: null, badKode: false, changed: false };
@@ -49,16 +51,16 @@ function applyOps(team, ops, settings, adminOk, now){
     const at = Math.min(num(op.at, now), now + 60000);
     const task = String(op.task || '');
     if (op.type === 'done'){
-      if (!TASK_RE.test(task)) continue;
+      if (!TASK_RE.test(task) || task === PIC) continue;
       if (at <= (team.cleared[task] || 0) || at <= (team.resetAt || 0)) continue;  // løst før en voksen slettede den
       const old = team.done[task];
       if (old && old.at > at) continue;
-      const photo = typeof op.photo === 'string' && op.photo.startsWith('data:image/') && op.photo.length <= MAX_PHOTO ? op.photo : null;
+      const photo = validPhoto(op.photo);
       team.done[task] = { at, by: String(op.by || '').slice(0, 12), hasPhoto: !!photo };
       out.photos.set(task, photo ? { data: photo, at } : null);
       out.changed = true;
     } else if (op.type === 'undo'){
-      if (!TASK_RE.test(task)) continue;
+      if (!TASK_RE.test(task) || task === PIC) continue;
       if (!kodeOk(op)){ out.badKode = true; continue; }
       team.cleared[task] = Math.max(team.cleared[task] || 0, at);
       const old = team.done[task];
@@ -75,6 +77,12 @@ function applyOps(team, ops, settings, adminOk, now){
       if (op.name != null) team.name = cleanName(op.name);
       if (op.players != null) team.players = cleanPlayers(op.players);
       team.metaAt = at;
+      out.changed = true;
+    } else if (op.type === 'teampic'){
+      if (at < ((team.pic && team.pic.at) || 0)) continue;
+      const photo = validPhoto(op.photo);
+      team.pic = { at, on: !!photo };
+      out.photos.set(PIC, photo ? { data: photo, at } : null);
       out.changed = true;
     } else if (op.type === 'settings'){
       if (!kodeOk(op)){ out.badKode = true; continue; }
@@ -95,8 +103,12 @@ function applyOps(team, ops, settings, adminOk, now){
   return out;
 }
 
+const validPhoto = x => typeof x === 'string' && x.startsWith('data:image/') && x.length <= MAX_PHOTO ? x : null;
 const pubTeam = t => ({ id: t._id, name: t.name, players: t.players, done: t.done || {}, resetAt: t.resetAt || 0,
-                         metaAt: t.metaAt || 0, created: t.created || 0, updated: t.updated || 0 });
+                         metaAt: t.metaAt || 0, created: t.created || 0, updated: t.updated || 0, pic: t.pic || { at: 0, on: false } });
+// Til listen "Find jeres hold": kun det, der skal vises
+const listTeam = t => ({ id: t._id, name: t.name, players: t.players, count: Object.keys(t.done || {}).length,
+                          updated: t.updated || 0, metaAt: t.metaAt || 0, pic: t.pic || { at: 0, on: false } });
 const pubSettings = s => ({ secret: s.secret, easy: !!s.easy, at: s.at || 0 });
 
 /* ================= Hvor holdene gemmes ================= */
@@ -121,6 +133,7 @@ class MemoryStore {
   async saveSettings(s){ this.settings = clone(Object.assign({}, s, { _id: 'settings' })); }
   async putPhotos(team, map){ for (const [task, p] of map){ const k = team + ':' + task; if (p) this.photos.set(k, { data: p.data, at: p.at }); else this.photos.delete(k); } }
   async getPhotos(team){ const o = {}; for (const [k, p] of this.photos) if (k.startsWith(team + ':')) o[k.slice(team.length + 1)] = p.data; return o; }
+  async getPhoto(team, task){ const p = this.photos.get(team + ':' + task); return p ? p.data : null; }
 }
 
 /* MongoDB (fx MongoDB Atlas' gratis M0-klynge) */
@@ -181,6 +194,7 @@ class MongoStore {
     for (const p of await this.photoCol.find({ team }).toArray()) o[p.task] = p.data;
     return o;
   }
+  async getPhoto(team, task){ await this.ready(); const p = await this.photoCol.findOne({ _id: team + ':' + task }); return p ? p.data : null; }
 }
 
 /* ================= API ================= */
@@ -192,21 +206,19 @@ function makeApi(store){
     const now = Date.now();
     let settings = await store.getSettings();
     for (let attempt = 0; attempt < 8; attempt++){
-      let team = await store.getTeam(id), isNew = false, wasDeleted = false;
+      let team = await store.getTeam(id), isNew = false;
       if (!team){
         if (!opts.create) return { missing: true };
+        // Har en voksen fjernet holdet, oprettes det ikke igen: telefonen viser velkomstskærmen i stedet
+        if (await store.isTomb(id)) return { deleted: true, settings, now };
         isNew = true;
-        wasDeleted = await store.isTomb(id);
         team = newTeam(id, opts.name, opts.players, now);
       }
-      // Er holdet slettet af en voksen, tæller telefonens gamle ændringer ikke med
-      const useOps = wasDeleted ? ops.filter(op => op && op.type === 'settings') : ops;
-      const res = applyOps(team, useOps, settings, opts.adminOk, now);
+      const res = applyOps(team, ops, settings, opts.adminOk, now);
       if ((isNew || res.changed) && !(await store.saveTeam(team, isNew))) continue;
-      if (wasDeleted) await store.clearTomb(id);
       if (res.photos.size) await store.putPhotos(id, res.photos);
       if (res.settings){ await store.saveSettings(res.settings); settings = res.settings; }
-      return { team, settings, created: isNew && !wasDeleted, wasDeleted, badKode: res.badKode, now };
+      return { team, settings, created: isNew, badKode: res.badKode, now };
     }
     throw new Error('travlt');
   }
@@ -225,8 +237,23 @@ function makeApi(store){
       const ops = Array.isArray(body.ops) ? body.ops.slice(0, MAX_OPS) : [];
       const settings = await store.getSettings();
       const r = await change(id, ops, { create: true, name: body.name, players: body.players, adminOk: kodeOk(req, settings) });
+      if (r.deleted) return send(200, { deleted: true, settings: pubSettings(r.settings), now: r.now, db: store.kind });
       return send(200, { team: pubTeam(r.team), settings: pubSettings(r.settings), now: r.now, db: store.kind,
-                         created: r.created, wasDeleted: r.wasDeleted, badKode: r.badKode });
+                         created: r.created, badKode: r.badKode });
+    }
+    // Listen på velkomstskærmen: "Find jeres hold"
+    if (p === '/api/teams' && req.method === 'GET'){
+      return send(200, { teams: (await store.listTeams()).map(listTeam), now: Date.now(), db: store.kind });
+    }
+    // Holdbilledet som almindeligt billede (gemmes i browserens cache, fordi adressen skifter, når billedet skiftes)
+    if (p === '/api/teampic' && req.method === 'GET'){
+      const id = String(url.searchParams.get('team') || '');
+      if (!ID_RE.test(id)) return send(400, { error: 'team' });
+      const data = await store.getPhoto(id, PIC);
+      const m = data && /^data:(image\/[a-z+]+);base64,(.*)$/s.exec(data);
+      if (!m) return send(404, { error: 'intet billede' });
+      res.writeHead(200, { 'Content-Type': m[1], 'Cache-Control': url.searchParams.get('v') ? 'public, max-age=31536000, immutable' : 'no-cache' });
+      return res.end(Buffer.from(m[2], 'base64'));
     }
     if (p === '/api/photos' && req.method === 'GET'){
       const id = String(url.searchParams.get('team') || '');

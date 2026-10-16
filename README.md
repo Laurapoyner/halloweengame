@@ -10,8 +10,11 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 
 ## Før legen (til den voksne)
 
-1. Åbn **Voksen-menuen** med ⚙️ øverst til højre. Koden er `1031`.
-2. Tryk på holdnavnet øverst, og skriv, hvor mange børn der er på holdet. Det styrer antallet af sprællemænd og flagermus (10 hver).
+1. Åbn spillet på hver telefon. Første gang spørger det, om holdet er nyt, eller om det skal fortsætte et hold, der findes:
+   - **Opret et nyt hold:** spillet foreslår et navn. Ret det, eller slå med 🎲 for et nyt forslag. Vælg, hvor mange hekse I er (styrer antallet af sprællemænd og flagermus, 10 hver). Holdet kan også tage et **holdbillede**, hvis de vil.
+   - **Find et hold, der findes:** vælg holdet på listen for at fortsætte på denne telefon, fx hvis en telefon er løbet tør for strøm. Kræver serveren (se nederst).
+2. Navn, antal og holdbillede kan altid ændres ved at trykke på holdnavnet øverst.
+3. **Voksen-menuen** åbnes med ⚙️ øverst til højre. Koden er `1031`.
 
 **Spøgelsesmåleren** virker som "varm og kold".
 - Telefonen tæller skridt og ved, hvilken vej den peger. Væsenet gemmer sig 5–11 meter væk i en tilfældig retning.
@@ -35,7 +38,8 @@ En Halloween-skattejagt for børn, der kører i telefonens browser. Hvert hold f
 - **Slet** en opgave, holdet skal lave om, eller **Godkend** en, der driller.
 - **Slet alt, holdet har lavet** starter holdet forfra. Tryk to gange for at bekræfte.
 - **Brug holdet på denne telefon** flytter et hold til en ny telefon, fx hvis en telefon løber tør for strøm.
-- **Fjern holdet** sletter holdet helt, fx et testhold.
+- **Fjern holdet** sletter holdet helt, fx et testhold. Er holdet stadig åbent på en telefon, viser den velkomstskærmen igen.
+- **＋ Nyt hold på denne telefon** opretter et nyt hold med navneforslag og holdbillede.
 - Ændringerne dukker op på holdets telefon inden for ca. 10 sekunder.
 
 **Driller en opgave?**
@@ -170,6 +174,7 @@ Siden opdateres automatisk, når repoet ændres.
 
 ## Godt at vide
 
+- **Baggrundslyd:** en lille uhyggelig spilledåse-vals med vind og en ugle, lavet direkte i browseren. Den starter ved første tryk, dæmpes når stemmen taler og når kameraet er i gang, og slås til og fra med 🔊 øverst. Valget huskes på telefonen.
 - **Kropsgenkendelse:** Googles MediaPipe. Den hentes fra internettet første gang spejlet åbnes (ca. 10 MB), så telefonerne skal have net.
 - **Jagterne** bruger kun telefonens egne sensorer og virker uden net, når siden først er åbnet.
 - **Gemt fremskridt:** hver telefon gemmer selv først og sender ændringerne til serveren, når der er net. Mister serveren sine data, sender telefonerne deres fremskridt op igen.

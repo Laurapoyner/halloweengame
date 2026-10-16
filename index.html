@@ -370,6 +370,42 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 .rec-btns .btn.small{min-width:44px}
 .rec-stop{background:var(--blood);color:var(--night);animation:blink 1s infinite}
 
+/* Velkomst: nyt hold eller et hold, der findes */
+.welcome{position:fixed;inset:0;z-index:30;overflow-y:auto;
+  background:radial-gradient(ellipse at 50% -10%, rgb(184 140 255 / .22), transparent 60%), var(--night)}
+.welcome-in{
+  max-width:480px;min-height:100%;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;
+}
+.welcome h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2.8rem,12vw,4rem);line-height:.95;margin:0;color:var(--moon);text-wrap:balance}
+.welcome-lede{margin:0;color:var(--mist);font-size:1.1rem;max-width:32ch;text-wrap:pretty}
+.welcome-art{font-size:4.2rem;line-height:1}
+.welcome .actions,.welcome .field,.welcome .err{width:100%}
+.welcome .field{text-align:left}
+.welcome .err:empty{display:none}
+.name-row{display:flex;gap:8px}
+.name-row .inp{flex:1;min-width:0}
+.dice{font-size:1.5rem;min-width:58px;min-height:52px}
+.stepper{display:flex;align-items:center;gap:18px}
+.stepper b{font-size:1.7rem;min-width:2ch;text-align:center;color:var(--bone)}
+.stepper .btn.small{min-width:52px;min-height:48px;font-size:1.4rem}
+.team-pic{display:inline-grid;place-items:center;border-radius:50%;overflow:hidden;background:var(--dusk-2);color:var(--bone);font-weight:800;flex:none;width:40px;height:40px;font-size:1.1rem}
+.team-pic img{width:100%;height:100%;object-fit:cover;display:block}
+.team-pic.sm{width:28px;height:28px;font-size:.85rem}
+.team-pic.big{width:124px;height:124px;font-size:2.8rem;border:3px solid var(--moon);appearance:none;cursor:pointer;padding:0}
+.team-pic.huge{width:140px;height:140px;font-size:3rem;border:4px solid var(--slime)}
+.team .team-pic{margin:-4px 2px -4px -8px}
+.pic-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.team-list{display:flex;flex-direction:column;gap:8px;width:100%}
+.team-row{appearance:none;display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--dusk);border:2px solid var(--dusk-2);border-radius:16px;padding:10px 12px;color:var(--bone);font:700 1.05rem/1.2 var(--font-body);cursor:pointer;min-height:68px}
+.team-row:hover,.team-row:focus-visible{border-color:var(--hex)}
+.team-row .team-pic{width:48px;height:48px}
+.tr-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.tr-name small{display:block;font-weight:500;font-size:.8rem;color:var(--mist);margin-top:2px}
+.ov-team summary .team-pic{width:32px;height:32px;font-size:.9rem}
+
 /* Finale */
 .finale{position:fixed;inset:0;z-index:25;background:var(--night);overflow-y:auto}
 .finale-in{
@@ -398,11 +434,13 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 </head>
 <body>
 <input id="cam" class="vh" type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+<input id="teamCam" class="vh" type="file" accept="image/*" capture="user" tabindex="-1" aria-hidden="true">
 
 <main class="app">
   <header class="top">
-    <button id="teamBtn" class="team" type="button" aria-label="Skift holdnavn og antal">Hold <span id="teamName" class="tn">Græskarhovederne</span><span class="pen" aria-hidden="true">✎</span></button>
+    <button id="teamBtn" class="team" type="button" aria-label="Skift holdnavn, holdbillede og antal"><span id="teamAvatar" class="team-pic sm" hidden></span>Hold <span id="teamName" class="tn">Græskarhovederne</span><span class="pen" aria-hidden="true">✎</span></button>
     <span class="top-right"><span id="count" class="count">0 af 16</span>
+      <button id="musicBtn" class="gear" type="button" aria-pressed="true" aria-label="Baggrundslyd" title="Baggrundslyd til/fra">🔊</button>
       <button id="adultTop" class="gear" type="button" aria-label="Voksen-menu">⚙️</button></span>
   </header>
 
@@ -492,7 +530,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 
   <footer class="foot">
     <button id="adultBtn" class="ghost" type="button">Voksen-menu</button>
-    <span class="ver">Version 12</span>
+    <span class="ver">Version 14</span>
   </footer>
 </main>
 
@@ -548,6 +586,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     </div>
     <div id="studioList"></div>
   </div>
+</div>
+
+<div id="welcome" class="welcome" hidden>
+  <div id="welcomeIn" class="welcome-in"></div>
 </div>
 
 <div id="finale" class="finale" hidden>
@@ -873,7 +915,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
      (se "Fælles lager på serveren" længere nede). */
   const KEY = 'heksens-trylledrik-v4';
   const DEFAULTS = { team:'Græskarhovederne', players:3, secret:'HALLOWEENGODTERI', pin:'1031', easy:false, autoRead:true, voice:'', rate:1,
-                     order:null, orderFor:'', done:{}, teamId:'', pending:[], metaAt:0, settingsAt:0, resetSeen:0 };
+                     order:null, orderFor:'', done:{}, teamId:'', pending:[], metaAt:0, settingsAt:0, resetSeen:0, teamPic:'', picAt:0, welcomed:false, music:true };
   const store = {
     load(){
       try {
@@ -899,6 +941,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     liveBarWrap:$('#liveBarWrap'), liveBar:$('#liveBar'), liveHint:$('#liveHint'),
     liveMsg:$('#liveMsg'), liveMsgBox:$('#liveMsgBox'), liveFlash:$('#liveFlash'), liveWalk:$('#liveWalk'), liveErr:$('#liveErr'), studio:$('#studio'),
     modal:$('#modal'), modalCard:$('#modalCard'), finale:$('#finale'), finaleIn:$('#finaleIn'),
+    welcome:$('#welcome'), welcomeIn:$('#welcomeIn'), teamCam:$('#teamCam'), teamAvatar:$('#teamAvatar'),
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -946,6 +989,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
     } catch (e) {}
+    if (state.music) musicStart();
   }
   function tone(freq, dur, type = 'sine', vol = .2, when = 0, slideTo = 0){
     if (!actx) return;
@@ -970,6 +1014,121 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     click(lv){ tone(1700 + Math.random()*1400, .025, 'square', .03 + lv*.07); },
     whoosh(){ tone(260, .6, 'sine', .22, 0, 1100); tone(520, .5, 'triangle', .1, .12, 180); },
   };
+
+  /* ================= Baggrundslyd: en lille uhyggelig spilledåse-vals med vind og en ugle =================
+     Lyden laves direkte i browseren (ingen lydfiler, intet net). Den dæmpes, når stemmen taler, og mens kameraet
+     er i gang, er helt stille i optagestudiet, og kan slås fra med 🔊-knappen øverst. */
+  const music = { on:false, gain:null, nodes:[], timer:0, next:0, step:0, loopN:0, level:0, base:.2 };
+  const BEAT = .62;                                        // ca. 97 slag i minuttet, 3/4-takt
+  const midiHz = n => 440 * Math.pow(2, (n - 69) / 12);
+  const SCORE = (() => {
+    // Melodi i a-mol (harmonisk), én takt pr. linje. En tone alene varer hele takten.
+    const mel = [[69,72,76],[68,71,76],[77,76,74],[76], [69,72,76],[77,76,72],[71,68,71],[69],
+                 [76,77,76],[74,72,71],[72,74,72],[71,69,68], [69,72,76],[81,80,76],[77,74,71],[69]];
+    const CH = { Am:[45,[60,64]], E:[40,[56,59]], Dm:[38,[57,62]], F:[41,[57,60]] };
+    const prog = ['Am','E','Dm','E', 'Am','F','E','Am', 'Am','Dm','Am','E', 'Am','E','Dm','Am'];
+    const ev = [];
+    mel.forEach((bar, i) => {
+      const b0 = i * 3, [bass, chord] = CH[prog[i]];
+      bar.forEach((n, j) => ev.push({ b: b0 + j, k:'box', n, len: bar.length === 1 ? 3 : 1 }));
+      ev.push({ b: b0, k:'bass', n: bass });
+      chord.forEach(n => { ev.push({ b: b0 + 1, k:'pluck', n }); ev.push({ b: b0 + 2, k:'pluck', n }); });
+    });
+    ev.push({ b: 52, k:'owl' });                           // pause med vind – og en ugle hver anden gang
+    return { ev: ev.sort((a, b) => a.b - b.b), len: 60 };
+  })();
+  function mVoice(f, t, type, vol, dec, out){
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dec);
+    o.connect(g).connect(out); o.start(t); o.stop(t + dec + .05);
+  }
+  function mBell(f, t, len, vol, out){
+    const dec = Math.max(1.1, len * 1.2);
+    mVoice(f, t, 'sine', vol, dec, out);
+    mVoice(f * 2, t, 'sine', vol * .22, dec * .5, out);
+    mVoice(f * 3.98, t, 'sine', vol * .05, dec * .25, out);   // den lidt skæve overtone giver spilledåse-klang
+  }
+  function mOwl(t, out){
+    [0, .42, 1.6, 2.02].forEach((dt, i) => {               // "hu-huuu … hu-huuu"
+      const o = actx.createOscillator(), g = actx.createGain(), s = t + dt, d = i % 2 ? .6 : .28;
+      o.type = 'sine'; o.frequency.setValueAtTime(400, s); o.frequency.exponentialRampToValueAtTime(350, s + d);
+      g.gain.setValueAtTime(.0001, s); g.gain.exponentialRampToValueAtTime(.13, s + .06); g.gain.exponentialRampToValueAtTime(.0001, s + d);
+      o.connect(g).connect(out); o.start(s); o.stop(s + d + .05);
+    });
+  }
+  function mEvent(e, t){
+    const out = music.gain;
+    if (!out) return;
+    if (e.k === 'owl'){ if (music.loopN % 2 === 0) mOwl(t, out); return; }
+    const f = midiHz(e.n);
+    if (e.k === 'box') mBell(f, t, e.len * BEAT, .3, out);
+    else if (e.k === 'bass') mVoice(f, t, 'triangle', .24, 1.1, out);
+    else mVoice(f, t, 'sine', .06, .35, out);
+  }
+  function musicTarget(){
+    if (!el.studio.hidden) return 0;                       // studiet optager: helt stille
+    let talking = !!playSrc;
+    try { talking = talking || (speech.ok && speechSynthesis.speaking); } catch (e) {}
+    return music.base * (talking ? .3 : 1) * (L ? .4 : 1);
+  }
+  function musicTick(){
+    if (!music.on || !actx || !music.gain) return;
+    const now = actx.currentTime, target = musicTarget();
+    if (Math.abs(target - music.level) > .002){ music.level = target; music.gain.gain.setTargetAtTime(target, now, .25); }
+    for (let guard = 0; guard < 200; guard++){
+      const e = SCORE.ev[music.step], t = music.next + e.b * BEAT;
+      if (t > now + .5) break;
+      if (t >= now - .05) mEvent(e, t);
+      if (++music.step >= SCORE.ev.length){ music.step = 0; music.next += SCORE.len * BEAT; music.loopN++; }
+    }
+  }
+  function musicStart(){
+    if (!state.music || music.on || !actx || document.visibilityState === 'hidden') return;
+    try {
+      const t0 = actx.currentTime, out = actx.createGain();
+      out.gain.value = 0; out.connect(actx.destination);
+      music.gain = out; music.level = musicTarget();
+      out.gain.setTargetAtTime(music.level, t0, 1.2);      // blød start
+      // Vind: støj gennem et filter, der langsomt bevæger sig
+      const buf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const noise = actx.createBufferSource(); noise.buffer = buf; noise.loop = true;
+      const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 520; bp.Q.value = .9;
+      const wind = actx.createGain(); wind.gain.value = .2;
+      const l1 = actx.createOscillator(), l1g = actx.createGain(); l1.frequency.value = .07; l1g.gain.value = 260; l1.connect(l1g).connect(bp.frequency);
+      const l2 = actx.createOscillator(), l2g = actx.createGain(); l2.frequency.value = .045; l2g.gain.value = .14; l2.connect(l2g).connect(wind.gain);
+      noise.connect(bp).connect(wind).connect(out);
+      // En dyb, mørk tone under det hele
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 260;
+      const drone = actx.createGain(); drone.gain.value = .12;
+      const o1 = actx.createOscillator(); o1.type = 'triangle'; o1.frequency.value = 55;
+      const o2 = actx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 82.7;
+      o1.connect(lp); o2.connect(lp); lp.connect(drone).connect(out);
+      [noise, l1, l2, o1, o2].forEach(n => n.start(t0));
+      music.nodes = [noise, l1, l2, o1, o2, out];
+      music.next = t0 + .8; music.step = 0; music.loopN = 0; music.on = true;
+      music.timer = setInterval(musicTick, 100);
+      musicTick();
+    } catch (e) { music.on = false; }
+    updateMusicBtn();
+  }
+  function musicStop(){
+    if (!music.on) return;
+    music.on = false; clearInterval(music.timer);
+    const out = music.gain, nodes = music.nodes;
+    music.gain = null; music.nodes = [];
+    try { out.gain.setTargetAtTime(0, actx.currentTime, .2); } catch (e) {}
+    setTimeout(() => nodes.forEach(n => { try { n.stop && n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} }), 1200);
+    updateMusicBtn();
+  }
+  function updateMusicBtn(){
+    const b = document.getElementById('musicBtn');
+    if (!b) return;
+    b.textContent = state.music ? '🔊' : '🔇';
+    b.setAttribute('aria-pressed', state.music ? 'true' : 'false');
+    b.setAttribute('aria-label', state.music ? 'Baggrundslyd er slået til. Tryk for at slå den fra' : 'Baggrundslyd er slået fra. Tryk for at slå den til');
+  }
 
   /* ================= Stemme =================
      1) Lydfiler: findes lyd/stemmer.json (lavet af stemmer/lav-stemmer.py), afspilles de færdige lydfiler.
@@ -1169,6 +1328,8 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   function renderAll(){
     const d = doneCount(), n = TASKS.length, complete = d === n;
     el.teamName.textContent = state.team;
+    el.teamAvatar.hidden = !state.teamPic;
+    el.teamAvatar.innerHTML = state.teamPic ? `<img src="${state.teamPic}" alt="">` : '';
     el.count.textContent = `${d} af ${n}`;
     el.lede.textContent = complete
       ? 'Alt er fyldt! Løb hen til en voksen og sig kodeordet højt.'
@@ -2863,9 +3024,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
 
   function editTeam(){
     openModal(`<h2>Jeres hold</h2>
+      <div class="pic-wrap"><button type="button" class="team-pic big" data-act="tpic" aria-label="Tag et holdbillede">${state.teamPic ? `<img src="${state.teamPic}" alt="Holdbillede">` : '<span aria-hidden="true">📷</span>'}</button>
+        <button type="button" class="linkish" data-act="tpic">${state.teamPic ? 'Tag et nyt holdbillede' : 'Tag et holdbillede'}</button></div>
       <form id="teamForm" class="field" autocomplete="off">
         <label for="teamIn">Hvad hedder jeres hold?</label>
-        <input id="teamIn" class="inp" type="text" maxlength="24" value="${esc(state.team)}" data-focus>
+        <input id="teamIn" class="inp" type="text" maxlength="30" value="${esc(state.team)}" data-focus>
         <label for="playersIn" style="margin-top:8px">Hvor mange hekse er I?</label>
         <input id="playersIn" class="inp" type="number" inputmode="numeric" min="1" max="8" value="${Math.max(1, state.players|0)}">
         <p class="help">Bruges i det magiske spejl: ${PER_PLAYER} sprællemænd og ${PER_PLAYER} flagermus hver.</p>
@@ -2996,6 +3159,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       return;
     }
     if (act === 'tadult'){ clearInterval(ov.timer); renderAdult(); return; }
+    if (act === 'tpic'){ el.teamCam.dataset.for = 'team'; el.teamCam.click(); return; }
     if (act === 'overview'){ applyAdultFields(); openOverview(); return; }
     if (act.startsWith('ov')){ ovAction(a, act); return; }
     if (act === 'voicetest'){
@@ -3064,11 +3228,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   function syncSoon(ms){ clearTimeout(sync.timer); sync.timer = setTimeout(syncNow, ms); }
 
   function syncNow(){
-    if (!serverUsable()) return Promise.resolve();
+    if (!serverUsable() || !state.teamId) return Promise.resolve();
     if (sync.busy) return sync.p;
     sync.busy = true;
     sync.p = (async () => {
-      ensureTeamId();
       const teamId = state.teamId, ops = state.pending.slice(0, 6);
       let more = false;
       try {
@@ -3083,7 +3246,8 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         sync.offset = j.now - (t0 + t1) / 2;
         if (state.teamId === teamId){
           state.pending.splice(0, ops.length);
-          applyServer(j);
+          if (j.deleted) teamRemoved();
+          else applyServer(j);
         }
         sync.status = 'ok'; sync.db = j.db || ''; sync.error = ''; sync.fails = 0;
         more = state.pending.length > 0;
@@ -3110,16 +3274,13 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
       if (state.secret !== j.settings.secret || state.easy !== j.settings.easy) changed = true;
       state.secret = j.settings.secret; state.easy = !!j.settings.easy; state.settingsAt = j.settings.at;
     }
-    if (j.wasDeleted){
-      // En voksen har fjernet holdet: start forfra
-      state.done = {}; state.order = null; shownSet = null;
-      state.pending = state.pending.filter(op => op.type === 'settings' || op.type === 'meta');
-      changed = true;
-    } else if (j.created){
-      // Serveren kendte ikke holdet (fx en ny database): send det, telefonen allerede har løst
+    if (j.created){
+      // Serveren kendte ikke holdet (fx en ny database): send det, telefonen allerede har løst – og holdbilledet
       const missing = Object.entries(state.done).filter(([k]) => !(t.done || {})[k]);
-      if (missing.length){
+      const needPic = state.teamPic && !(t.pic && t.pic.on) && !state.pending.some(op => op.type === 'teampic');
+      if (missing.length || needPic){
         for (const [task, d] of missing) state.pending.push({ type:'done', task, at: d.at || serverNow(), by: d.by || '', photo: d.photo || null });
+        if (needPic) state.pending.push({ type:'teampic', photo: state.teamPic, at: state.picAt || serverNow() });
         store.save(state);
         return;
       }
@@ -3127,6 +3288,12 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if ((t.metaAt || 0) > (state.metaAt || 0) && !state.pending.some(op => op.type === 'meta')){
       if (state.team !== t.name || state.players !== t.players) changed = true;
       state.team = t.name; state.players = t.players; state.metaAt = t.metaAt;
+    }
+    // Holdbilledet (kan være taget på en anden telefon på samme hold)
+    const pic = t.pic || { at:0, on:false };
+    if (!state.pending.some(op => op.type === 'teampic')){
+      if (pic.on && (pic.at > (state.picAt || 0) || !state.teamPic)) fetchTeamPic(pic.at);
+      else if (!pic.on && pic.at > (state.picAt || 0)){ state.picAt = pic.at; if (state.teamPic){ state.teamPic = ''; changed = true; } }
     }
     // Serverens opgaver + det, der endnu ikke er sendt
     const old = state.done, next = {};
@@ -3237,7 +3404,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
         <button type="button" class="btn secondary small" data-act="${d ? 'ovundo' : 'ovgrant'}" data-team="${esc(t.id)}" data-id="${task.id}">${d ? 'Slet' : 'Godkend'}</button></div>`;
     }).join('');
     return `<details class="ov-team" data-team="${esc(t.id)}"${open ? ' open' : ''}>
-      <summary><span class="ov-name">${esc(t.name)}${me ? ' <span class="ov-me">denne telefon</span>' : ''}</span>
+      <summary>${avatarHTML(t)}<span class="ov-name">${esc(t.name)}${me ? ' <span class="ov-me">denne telefon</span>' : ''}</span>
         <span class="ov-count">${n}/${TASKS.length}</span><span class="ov-ago">${t.updated ? ago(t.updated) : ''}</span></summary>
       <div class="ov-body">
         <div class="rows">${rows}</div>
@@ -3284,11 +3451,10 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (sync.busy) await sync.p;
     if (state.pending.some(op => op.type !== 'settings')) await syncNow();
     if (state.pending.some(op => op.type !== 'settings')) throw new Error('venter');
-    state.teamId = t ? t.id : newTeamId();
-    state.team = t ? t.name : randomTeamName();
-    state.players = t ? t.players : 3;
-    state.metaAt = t ? (t.metaAt || 0) : serverNow();
+    state.teamId = t.id; state.team = t.name; state.players = t.players; state.metaAt = t.metaAt || 0;
     state.done = {}; state.order = null; state.resetSeen = 0; shownSet = null;
+    state.teamPic = ''; state.picAt = 0; state.welcomed = true;
+    state.pending = state.pending.filter(op => op.type === 'settings');
     store.save(state);
     renderAll();
     await syncNow();
@@ -3306,10 +3472,11 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
     a.disabled = true;
     try {
-      if (act === 'ovnew' || act === 'ovuse'){
-        await switchTeam(act === 'ovuse' ? ov.teams.find(x => x.id === id) : null);
+      if (act === 'ovnew'){ clearInterval(ov.timer); closeModal(); showWelcome('new', 'admin'); return; }
+      if (act === 'ovuse'){
+        const t = ov.teams.find(x => x.id === id);
+        if (t) await switchTeam(t);
         closeModal(); renderAll();
-        if (act === 'ovnew') editTeam();
         return;
       }
       if (act === 'ovdel') await adminFetch('api/admin/delete', { team:id });
@@ -3330,6 +3497,217 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     }
   }
 
+  /* ================= Velkomst på en ny telefon: opret et hold eller find et, der findes ================= */
+  const ADJ = ['Uhyggelige','Frygtløse','Listige','Gyselige','Modige','Mystiske','Lynhurtige','Hemmelige','Glade','Larmende','Snedige','Natlige'];
+  const NOUN = ['Flagermus','Græskar','Spøgelser','Edderkopper','Zombier','Mumier','Varulve','Hekse','Troldmænd','Skeletter','Vampyrer','Uhyrer'];
+  const pickOne = a => a[Math.floor(Math.random() * a.length)];
+  const w = { step:'start', from:'start', name:'', players:3, pic:'', teams:null, err:'', pick:null, canFind:false };
+  function suggestName(){
+    const used = new Set((w.teams || []).map(t => String(t.name).toLowerCase()));
+    for (let i = 0; i < 40; i++){
+      const n = Math.random() < .3 ? randomTeamName() : `De ${pickOne(ADJ)} ${pickOne(NOUN)}`;
+      if (n.length <= 30 && n !== w.name && !used.has(n.toLowerCase())) return n;
+    }
+    return randomTeamName();
+  }
+  function avatarHTML(t, size){
+    const cls = 'team-pic' + (size ? ' ' + size : '');
+    if (t.pic && t.pic.on && serverUsable()) return `<span class="${cls}"><img src="api/teampic?team=${encodeURIComponent(t.id)}&v=${t.pic.at}" alt="" loading="lazy"></span>`;
+    return `<span class="${cls}" aria-hidden="true">${esc((String(t.name).replace(/^De\s+/i, '').trim()[0] || '?').toUpperCase())}</span>`;
+  }
+  // Findes der en fælles server? Så kan man også finde de hold, der allerede er i gang
+  async function probeServer(){
+    if (!serverUsable()) return;
+    try {
+      const r = await fetch('api/health', { cache:'no-store' });
+      if (!(r.headers.get('content-type') || '').includes('json')){ sync.status = 'none'; return; }
+      const j = await r.json();
+      sync.status = j.ok ? 'ok' : 'down'; sync.db = j.db || '';
+      if (j.now) sync.offset = j.now - Date.now();
+    } catch (e) { sync.status = 'down'; }
+  }
+  async function loadTeamsList(){
+    try {
+      const r = await fetch('api/teams', { cache:'no-store' });
+      if (!(r.headers.get('content-type') || '').includes('json')) throw new Error('none');
+      const j = await r.json();
+      w.teams = j.teams || [];
+      if (w.step === 'find') w.err = '';
+    } catch (e) {
+      if (w.step === 'find') w.err = 'Kan ikke hente holdene lige nu. Tjek forbindelsen, og prøv igen.';
+      w.teams = w.teams || [];
+    }
+    if (!el.welcome.hidden && w.step === 'find') renderWelcome();
+  }
+  function showWelcome(step, from){
+    Object.assign(w, { step: step || 'start', from: from || 'start', err:'', pic:'', players:3, pick:null });
+    w.name = suggestName();
+    w.canFind = serverUsable();
+    el.welcome.hidden = false; el.welcome.scrollTop = 0;
+    renderWelcome();
+    (sync.status === 'start' ? probeServer() : Promise.resolve()).then(() => {
+      w.canFind = serverUsable();
+      if (!el.welcome.hidden && w.step === 'start') renderWelcome();
+      if (w.canFind) loadTeamsList();
+    });
+  }
+  function hideWelcome(){ el.welcome.hidden = true; el.welcomeIn.innerHTML = ''; }
+  function renderWelcome(){
+    const err = `<p class="err" role="alert">${esc(w.err)}</p>`;
+    let html = '';
+    if (w.step === 'start'){
+      html = `<span class="welcome-art" aria-hidden="true">🧙‍♀️</span>
+        <p class="label">Heksens Trylledrik</p>
+        <h2>Velkommen, unge hekse!</h2>
+        <p class="welcome-lede">${w.canFind ? 'Er I et nyt hold, eller skal I fortsætte et hold, der allerede er i gang?' : 'Først skal jeres hold have et navn.'}</p>
+        ${err}
+        <div class="actions">
+          <button type="button" class="btn primary" data-wact="new">✨ Opret et nyt hold</button>
+          ${w.canFind ? '<button type="button" class="btn secondary" data-wact="find">🔍 Find et hold, der findes</button>' : ''}
+        </div>`;
+    } else if (w.step === 'new'){
+      html = `<h2>Nyt hold</h2>
+        <div class="pic-wrap"><button type="button" class="team-pic big" data-wact="pic" aria-label="Tag et holdbillede">${w.pic ? `<img src="${w.pic}" alt="Holdbillede">` : '<span aria-hidden="true">📷</span>'}</button>
+          <button type="button" class="linkish" data-wact="pic">${w.pic ? 'Tag et nyt holdbillede' : 'Tag et holdbillede (hvis I vil)'}</button></div>
+        <div class="field"><label for="wName">Holdnavn</label>
+          <div class="name-row"><input id="wName" class="inp" type="text" maxlength="30" value="${esc(w.name)}" autocomplete="off" autocapitalize="words">
+            <button type="button" class="btn secondary small dice" data-wact="dice" aria-label="Find på et andet navn">🎲</button></div>
+          <span class="help">Ret navnet, eller slå med terningen for et nyt forslag.</span></div>
+        <div class="field"><span class="flabel">Hvor mange hekse er I?</span>
+          <div class="stepper"><button type="button" class="btn secondary small" data-wact="pminus" aria-label="Færre">−</button><b id="wPlayers">${w.players}</b><button type="button" class="btn secondary small" data-wact="pplus" aria-label="Flere">+</button></div>
+          <span class="help">Bruges i det magiske spejl: ${PER_PLAYER} sprællemænd og ${PER_PLAYER} flagermus hver.</span></div>
+        ${err}
+        <div class="actions"><button type="button" class="btn primary" data-wact="create">🪄 Start eventyret</button>
+          <button type="button" class="linkish" data-wact="back">${w.from === 'admin' ? 'Annuller' : 'Tilbage'}</button></div>`;
+    } else if (w.step === 'find'){
+      const list = w.teams == null ? '<p class="help">Henter holdene …</p>'
+        : !w.teams.length ? (w.err ? '' : '<p class="help">Der er ingen hold endnu. Opret et nyt hold i stedet.</p>')
+        : w.teams.map(t => `<button type="button" class="team-row" data-wact="pick" data-team="${esc(t.id)}">${avatarHTML(t)}
+            <span class="tr-name">${esc(t.name)}<small>${t.count} af ${TASKS.length} opgaver · ${t.players} hekse${t.updated ? ' · ' + ago(t.updated) : ''}</small></span></button>`).join('');
+      html = `<h2>Find jeres hold</h2>
+        <p class="welcome-lede">Tryk på jeres hold for at fortsætte på denne telefon.</p>
+        <div class="team-list">${list}</div>
+        ${err}
+        <div class="actions">${w.err ? '<button type="button" class="btn secondary" data-wact="find">Prøv igen</button>' : ''}
+          <button type="button" class="btn secondary" data-wact="new">✨ Opret et nyt hold i stedet</button>
+          <button type="button" class="linkish" data-wact="back">Tilbage</button></div>`;
+    } else if (w.step === 'pick'){
+      const t = w.pick;
+      html = `${avatarHTML(t, 'big')}
+        <h2>${esc(t.name)}</h2>
+        <p class="welcome-lede">${t.count} af ${TASKS.length} opgaver er klaret. Er det jeres hold?</p>
+        ${err}
+        <div class="actions"><button type="button" class="btn primary" data-wact="join">Ja, fortsæt som ${esc(t.name)}</button>
+          <button type="button" class="linkish" data-wact="find">Nej, tilbage til listen</button></div>`;
+    }
+    el.welcomeIn.innerHTML = html;
+  }
+
+  async function createTeam(name, players, pic){
+    if (state.teamId){
+      // Telefonen havde et hold (nyt hold fra voksen-menuen): send dets ændringer først
+      if (sync.busy) await sync.p;
+      if (state.pending.some(op => op.type !== 'settings')) await syncNow();
+      if (state.pending.some(op => op.type !== 'settings')) throw new Error('venter');
+    }
+    Object.assign(state, { teamId: newTeamId(), team: name, players, metaAt: serverNow(), done: {}, order: null, resetSeen: 0,
+                           teamPic: pic || '', picAt: pic ? serverNow() : 0, welcomed: true });
+    state.pending = state.pending.filter(op => op.type === 'settings');
+    if (pic) state.pending.push({ type:'teampic', photo: pic, at: state.picAt });
+    shownSet = null;
+    store.save(state);
+    syncNow();
+  }
+
+  // En voksen har fjernet holdet: telefonen starter forfra med velkomsten
+  function teamRemoved(){
+    const name = state.team;
+    Object.assign(state, { teamId:'', done:{}, order:null, resetSeen:0, teamPic:'', picAt:0, welcomed:false });
+    state.pending = state.pending.filter(op => op.type === 'settings');
+    shownSet = null;
+    store.save(state);
+    if (L) closeLive(true);
+    if (!el.sheet.hidden) closeSheet();
+    if (!el.modal.hidden) closeModal();
+    el.finale.hidden = true; el.studio.hidden = true;
+    renderAll();
+    showWelcome('start');
+    w.err = `Holdet "${name}" er fjernet af en voksen. Opret et nyt hold, eller find et andet.`;
+    renderWelcome();
+  }
+
+  async function fetchTeamPic(at){
+    if (!serverUsable() || sync.picLoading === at) return;
+    sync.picLoading = at;
+    try {
+      const r = await fetch(`api/teampic?team=${encodeURIComponent(state.teamId)}&v=${at}`);
+      if (!r.ok) throw new Error('pic');
+      const blob = await r.blob();
+      const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+      if (!state.pending.some(op => op.type === 'teampic')){ state.teamPic = data; state.picAt = at; store.save(state); renderAll(); }
+    } catch (e) {}
+    sync.picLoading = 0;
+  }
+
+  // Holdbilledet: midten af billedet, beskåret til en firkant
+  function squareThumb(img, size){
+    const w0 = img.naturalWidth || img.width, h0 = img.naturalHeight || img.height, s = Math.min(w0, h0), out = Math.min(size, s);
+    const c = document.createElement('canvas');
+    c.width = c.height = out;
+    c.getContext('2d').drawImage(img, (w0 - s) / 2, (h0 - s) / 2, s, s, 0, 0, out, out);
+    return c.toDataURL('image/jpeg', .8);
+  }
+  el.teamCam.addEventListener('change', async () => {
+    const file = el.teamCam.files && el.teamCam.files[0];
+    el.teamCam.value = '';
+    if (!file) return;
+    let data;
+    try { const { img, url } = await loadImage(file); data = squareThumb(img, 320); URL.revokeObjectURL(url); }
+    catch (e) { return; }
+    sfx.snap();
+    // Er velkomstskærmen fremme, hører billedet til det hold, der er ved at blive oprettet
+    if (!el.welcome.hidden || !state.teamId){ w.pic = data; if (!el.welcome.hidden) renderWelcome(); return; }
+    state.teamPic = data; state.picAt = serverNow();
+    state.pending = state.pending.filter(op => op.type !== 'teampic');
+    queueOp({ type:'teampic', photo: data, at: state.picAt });
+    renderAll();
+    const big = el.modalCard.querySelector('.team-pic.big');
+    if (big) big.innerHTML = `<img src="${data}" alt="Holdbillede">`;
+  });
+
+  el.welcome.addEventListener('click', async e => {
+    const a = e.target.closest('[data-wact]');
+    if (!a) return;
+    const act = a.dataset.wact, nameIn = el.welcome.querySelector('#wName');
+    if (nameIn) w.name = nameIn.value;
+    unlockAudio();
+    if (act === 'new'){ w.step = 'new'; w.err = ''; renderWelcome(); }
+    else if (act === 'find'){ w.step = 'find'; w.err = ''; w.teams = null; renderWelcome(); loadTeamsList(); }
+    else if (act === 'back'){
+      if (w.from === 'admin'){ hideWelcome(); return; }
+      w.step = 'start'; w.err = ''; renderWelcome();
+    }
+    else if (act === 'dice'){ w.name = suggestName(); sfx.tick(3); renderWelcome(); }
+    else if (act === 'pminus' || act === 'pplus'){
+      w.players = Math.min(8, Math.max(1, w.players + (act === 'pplus' ? 1 : -1)));
+      el.welcome.querySelector('#wPlayers').textContent = w.players;
+    }
+    else if (act === 'pic'){ el.teamCam.dataset.for = 'welcome'; el.teamCam.click(); }
+    else if (act === 'pick'){ w.pick = (w.teams || []).find(t => t.id === a.dataset.team); if (w.pick){ w.step = 'pick'; w.err = ''; renderWelcome(); } }
+    else if (act === 'create' || act === 'join'){
+      a.disabled = true;
+      try {
+        if (act === 'create') await createTeam(String(w.name).trim().slice(0, 30) || suggestName(), w.players, w.pic);
+        else await switchTeam(w.pick);
+        hideWelcome(); renderAll(); sfx.chime();
+      } catch (err) {
+        w.err = err.message === 'venter' ? 'Telefonens gamle hold har ændringer, der ikke er sendt endnu. Prøv igen, når der er forbindelse.'
+          : 'Det lykkedes ikke. Tjek forbindelsen, og prøv igen.';
+        renderWelcome();
+      }
+    }
+  });
+
   /* ================= Finale ================= */
   const galleryHTML = () => TASKS.map(t => {
     const p = state.done[t.id] && state.done[t.id].photo;
@@ -3341,7 +3719,7 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
     if (Object.values(state.done).some(d => d.hasPhoto && !d.photo)) fetchPhotos(true).then(() => {
       const g = el.finaleIn.querySelector('.gallery'); if (g && !el.finale.hidden) g.innerHTML = galleryHTML();
     });
-    el.finaleIn.innerHTML = `<p class="label">Hold ${esc(state.team)}</p>
+    el.finaleIn.innerHTML = `${state.teamPic ? `<span class="team-pic huge"><img src="${state.teamPic}" alt="Holdbillede"></span>` : ''}<p class="label">Hold ${esc(state.team)}</p>
       <h2>Alt er fyldt!</h2>
       <p class="finale-lede">Spøgelsesglasset, trylledrikken og månen er fyldt. Løb hen til en voksen og sig kodeordet højt:</p>
       <div id="finalWord" class="word big" aria-label="Kodeordet er ${esc(letters().join(''))}"></div>
@@ -3367,6 +3745,15 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   const openAdult = () => askPin(renderAdult, 'Voksen-menuen er til den, der styrer legen.');
   $('#adultBtn').addEventListener('click', openAdult);
   $('#adultTop').addEventListener('click', openAdult);
+  $('#musicBtn').addEventListener('click', () => {
+    state.music = !state.music; store.save(state);
+    if (state.music){ unlockAudio(); musicStart(); } else musicStop();
+    updateMusicBtn();
+  });
+  updateMusicBtn();
+  // Lyd må først starte efter et tryk: det første tryk et sted på siden starter baggrundslyden
+  document.addEventListener('click', () => { if (state.music && !music.on) unlockAudio(); }, true);
+  document.addEventListener('touchend', () => { if (state.music && !music.on) unlockAudio(); }, { capture:true, passive:true });
   el.heroAct.addEventListener('click', () => { unlockAudio(); showFinale(); });
   document.addEventListener('keydown', e => {
     if (L && isAR(L.mode) && L.view && e.key === ' '){ registerStep(); e.preventDefault(); return; }
@@ -3388,11 +3775,16 @@ input[type=range]{width:100%;accent-color:var(--pumpkin);margin:4px 0}
   });
   if (window.__heksFakeDetector || window.__heksVoiceLog) window.__heksLive = () => L; // kun til test
   if (window.__heksVoiceLog) window.__heksSync = () => ({ sync, state, syncNow }); // kun til test
+  if (window.__heksVoiceLog) window.__heksMusic = () => ({ music, actx, SCORE }); // kun til test
 
   // Fælles lager: hent holdets stand fra serveren nu, når telefonen kommer på net igen, og når siden vises igen
-  if (serverUsable()){ ensureTeamId(); syncNow(); }
+  if (!state.teamId && !state.welcomed && !Object.keys(state.done).length) showWelcome('start');   // ny telefon
+  else if (serverUsable()){ ensureTeamId(); syncNow(); }
   window.addEventListener('online', () => syncNow());
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncNow(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible'){ syncNow(); if (state.music && actx){ if (actx.state === 'suspended') actx.resume(); musicStart(); } }
+    else musicStop();   // ingen lyd, når siden ikke ses (fx mens kameraet tager et billede)
+  });
 
   renderAll();
 })();
